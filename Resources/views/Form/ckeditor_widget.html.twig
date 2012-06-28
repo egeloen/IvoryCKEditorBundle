@@ -5,9 +5,7 @@
     <textarea {{ block('widget_attributes') }}>{{ value }}</textarea>
 
     <script type="text/javascript">
-        {% autoescape true js %}
-            var CKEDITOR_BASEPATH = '/bundles/ivoryckeditor/';
-        {% endautoescape %}
+        var CKEDITOR_BASEPATH = "{{ asset('bundles/ivoryckeditor/') }}";
     </script>
 
     <script type="text/javascript" src="{{ asset('bundles/ivoryckeditor/ckeditor.js') }}"></script>
