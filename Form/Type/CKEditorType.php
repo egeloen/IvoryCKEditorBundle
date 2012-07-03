@@ -3,10 +3,9 @@
 namespace Ivory\CKEditorBundle\Form\Type;
 
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\Form\FormViewInterface;
+use Symfony\Component\Form\FormBuilder;
+use Symfony\Component\Form\FormView;
 use Symfony\Component\Form\FormInterface;
-use Symfony\Component\OptionsResolver\OptionsResolverInterface;
 
 /**
  * CKEditor type
@@ -18,7 +17,7 @@ class CKEditorType extends AbstractType
     /**
      * {@inheritdoc}
      */
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilder $builder, array $options)
     {
         $builder
             ->setAttribute('toolbar', $options['toolbar'])
@@ -28,19 +27,19 @@ class CKEditorType extends AbstractType
     /**
      * {@inheritdoc}
      */
-    public function buildView(FormViewInterface $view, FormInterface $form, array $options)
+    public function buildView(FormView $view, FormInterface $form)
     {
         $view
-            ->setVar('toolbar', $form->getAttribute('toolbar'))
-            ->setVar('ui_color', $form->getAttribute('ui_color'));
+            ->set('toolbar', $form->getAttribute('toolbar'))
+            ->set('ui_color', $form->getAttribute('ui_color'));
     }
 
     /**
      * {@inheritdoc}
      */
-    public function setDefaultOptions(OptionsResolverInterface $resolver)
+    public function getDefaultOptions(array $array)
     {
-        $resolver->setDefaults(array(
+        $ret = array(
             'required' => false,
             'toolbar' => array(
                 array(
@@ -91,15 +90,15 @@ class CKEditorType extends AbstractType
                 )
             ),
             'ui_color' => null
-        ));
+        );
 
-        $resolver->addAllowedValues(array('required' => array(false)));
+        return $ret;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getParent()
+    public function getParent(array $options)
     {
         return 'textarea';
     }
