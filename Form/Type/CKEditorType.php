@@ -22,7 +22,8 @@ class CKEditorType extends AbstractType
     {
         $builder
             ->setAttribute('toolbar', $options['toolbar'])
-            ->setAttribute('ui_color', $options['ui_color']);
+            ->setAttribute('ui_color', $options['ui_color'])
+            ->setAttribute('configs', $options['configs']);
     }
 
     /**
@@ -30,9 +31,16 @@ class CKEditorType extends AbstractType
      */
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
+        $configs = array_merge(
+            $form->getAttribute('configs'),
+            array(
+                'toolbar'      => $form->getAttribute('toolbar'),
+                'ui_color'     => $form->getAttribute('ui_color'),
+            )
+        );
+
         $view->vars = array_replace($view->vars, array(
-            'toolbar'      => $form->getAttribute('toolbar'),
-            'ui_color'     => $form->getAttribute('ui_color'),
+            'configs' => $configs
         ));
     }
 
@@ -91,7 +99,8 @@ class CKEditorType extends AbstractType
                     'items' => array('Maximize', 'ShowBlocks','-','About')
                 )
             ),
-            'ui_color' => null
+            'ui_color' => null,
+            'configs' => array()
         ));
 
         $resolver->addAllowedValues(array('required' => array(false)));

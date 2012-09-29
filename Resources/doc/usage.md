@@ -77,6 +77,15 @@ $toolbar = array(
 
 Describes the base user interface color to be used by the editor.
 
+### Extra configs
+
+   - option: configs
+   - type: array
+   - default: array()
+
+Any extra config parameters can be added here. These will be passed directly to the editor instance.
+See here for the various options that can be configured this way by CKEditor: [http://docs.cksource.com/ckeditor_api/symbols/CKEDITOR.config.html](http://docs.cksource.com/ckeditor_api/symbols/CKEDITOR.config.html)
+
 ### Max length
 
    - option: max_length
