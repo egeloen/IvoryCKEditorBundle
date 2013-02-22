@@ -9,18 +9,16 @@
  * file that was distributed with this source code.
  */
 
-namespace Ivory\CKEditorBundle\Twig;
+namespace Ivory\CKEditorBundle\Helper;
 
-use \Twig_Extension;
-
-use Ivory\CKEditorBundle\Helper\AssetVersionTrimer;
+use Symfony\Component\Templating\Helper\Helper;
 
 /**
- * Trim asset version twig extension.
+ * TrimAssetVersionHelper.
  *
- * @author GeLo <geloen.eric@gmail.com>
+ * @author Geoffrey Brier <geoffrey.brier@gmail.com>
  */
-class TrimAssetVersionTwigExtension extends Twig_Extension
+class TrimAssetVersionHelper extends Helper
 {
     /** @param \Ivory\CKEditorBundle\Helper\AssetVersionTrimer */
     private $trimer;
@@ -33,16 +31,6 @@ class TrimAssetVersionTwigExtension extends Twig_Extension
     public function __construct(AssetVersionTrimer $trimer)
     {
         $this->trimer = $trimer;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getFilters()
-    {
-        return array(
-            'trim_asset_version' => new \Twig_Filter_Method($this, 'trim', array('is_safe' => array('html'))),
-        );
     }
 
     /**
@@ -64,6 +52,6 @@ class TrimAssetVersionTwigExtension extends Twig_Extension
      */
     public function getName()
     {
-        return 'trim_asset_version';
+        return 'ivory_ck_editor.trim_asset_version';
     }
 }
