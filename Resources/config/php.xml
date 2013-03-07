@@ -5,17 +5,16 @@
     xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
 
     <parameters>
-        <parameter key="ivory_ck_editor.twig.trim_asset_version_extension.class">Ivory\CKEditorBundle\Twig\TrimAssetVersionTwigExtension</parameter>
+        <parameter key="ivory_ck_editor.php.trim_asset_version_helper.class">Ivory\CKEditorBundle\Helper\TrimAssetVersionHelper</parameter>
     </parameters>
 
     <services>
         <service
-            id="ivory_ck_editor.twig.trim_asset_version_extension"
-            class="%ivory_ck_editor.twig.trim_asset_version_extension.class%"
-            public="false"
+            id="ivory_ck_editor.php.trim_asset_version_helper"
+            class="%ivory_ck_editor.php.trim_asset_version_helper.class%"
         >
             <argument type="service" id="ivory_ck_editor.asset_version_trimer"></argument>
-            <tag name="twig.extension" />
+            <tag name="templating.helper" alias="ivory_ck_editor.trim_asset_version" />
         </service>
     </services>
 </container>

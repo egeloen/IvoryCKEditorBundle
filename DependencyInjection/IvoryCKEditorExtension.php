@@ -46,14 +46,9 @@ class IvoryCKEditorExtension extends Extension
     {
         $loader = new XmlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
 
-        foreach (array('form', 'twig') as $service) {
-            $loader->load($service.'.xml');
-        }
+        $loader->load('form.xml');
 
-        $container->setParameter('twig.form.resources', array_merge(
-            $container->getParameter('twig.form.resources'),
-            array('IvoryCKEditorBundle:Form:ckeditor_widget.html.twig')
-        ));
+        $this->registerWidget($loader, $container);
 
         $container->setParameter('ivory_ck_editor.form.type.enable', $config['enable']);
 
@@ -65,6 +60,35 @@ class IvoryCKEditorExtension extends Extension
             if (!empty($config['plugins'])) {
                 $this->registerPlugins($config, $container);
             }
+        }
+    }
+
+    /**
+     * Registers the form widget.
+     *
+     * @param \Symfony\Component\DependencyInjection\Loader\XmlFileLoader $loader    An XmlFileLoader object.
+     * @param \Symfony\Component\DependencyInjection\ContainerBuilder     $container The container.
+     */
+    protected function registerWidget(XmlFileLoader $loader, ContainerBuilder $container)
+    {
+        $templatingEngines = $container->getParameter('templating.engines');
+
+        if (in_array('php', $templatingEngines)) {
+            $loader->load('php.xml');
+
+            $container->setParameter('templating.helper.form.resources', array_merge(
+                $container->getParameter('templating.helper.form.resources'),
+                array('IvoryCKEditorBundle:Form')
+            ));
+        }
+
+        if (in_array('twig', $templatingEngines)) {
+            $loader->load('twig.xml');
+
+            $container->setParameter('twig.form.resources', array_merge(
+                $container->getParameter('twig.form.resources'),
+                array('IvoryCKEditorBundle:Form:ckeditor_widget.html.twig')
+            ));
         }
     }
 
