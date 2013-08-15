@@ -289,7 +289,7 @@ class CKEditorType extends AbstractType
             'plugins'     => 'array',
         ));
 
-        $resolver->addAllowedValues(array('required' => array(false)));
+        $resolver->addAllowedValues(array('required' => array(true, false)));
     }
 
     /**
