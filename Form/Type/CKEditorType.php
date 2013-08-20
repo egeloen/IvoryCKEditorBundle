@@ -15,9 +15,10 @@ use Ivory\CKEditorBundle\Helper\AssetsVersionTrimerHelper;
 use Ivory\CKEditorBundle\Model\ConfigManagerInterface;
 use Ivory\CKEditorBundle\Model\PluginManagerInterface;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\FormBuilder;
+use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\Form\FormInterface;
+use Symfony\Component\OptionsResolver\OptionsResolverInterface;
 use Symfony\Component\Templating\Helper\CoreAssetsHelper;
 
 /**
@@ -217,9 +218,9 @@ class CKEditorType extends AbstractType
     /**
      * {@inheritdoc}
      */
-    public function buildForm(FormBuilder $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder->setAttribute('enable', (bool) $options['enable']);
+        $builder->setAttribute('enable', $options['enable']);
 
         if ($builder->getAttribute('enable')) {
             $builder->setAttribute('base_path', $options['base_path']);
@@ -249,41 +250,49 @@ class CKEditorType extends AbstractType
     /**
      * {@inheritdoc}
      */
-    public function buildView(FormView $view, FormInterface $form)
+    public function buildView(FormView $view, FormInterface $form, array $options)
     {
-        $view->set('enable', $form->getAttribute('enable'));
+        $view->vars['enable'] = $form->getConfig()->getAttribute('enable');
 
-        if ($form->getAttribute('enable')) {
-            $view->set(
-                'base_path',
-                $this->assetsVersionTrimerHelper->trim($this->assetsHelper->getUrl($form->getAttribute('base_path')))
+        if ($form->getConfig()->getAttribute('enable')) {
+            $view->vars['base_path'] = $this->assetsVersionTrimerHelper->trim(
+                $this->assetsHelper->getUrl($form->getConfig()->getAttribute('base_path'))
             );
 
-            $view->set('js_path', $this->assetsHelper->getUrl($form->getAttribute('js_path')));
-            $view->set('config', json_encode($form->getAttribute('config')));
-            $view->set('plugins', $form->getAttribute('plugins'));
+            $view->vars['js_path'] = $this->assetsHelper->getUrl($form->getConfig()->getAttribute('js_path'));
+            $view->vars['config'] = json_encode($form->getConfig()->getAttribute('config'));
+            $view->vars['plugins'] = $form->getConfig()->getAttribute('plugins');
         }
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getDefaultOptions(array $options)
+    public function setDefaultOptions(OptionsResolverInterface $resolver)
     {
-        return array(
+        $resolver->setDefaults(array(
             'enable'      => $this->enable,
             'base_path'   => $this->basePath,
             'js_path'     => $this->jsPath,
             'config_name' => null,
             'config'      => array(),
             'plugins'     => array(),
-        );
+        ));
+
+        $resolver->addAllowedTypes(array(
+            'enable'      => 'bool',
+            'config_name' => array('string', 'null'),
+            'base_path'   => array('string'),
+            'js_path'     => array('string'),
+            'config'      => 'array',
+            'plugins'     => 'array',
+        ));
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getParent(array $options)
+    public function getParent()
     {
         return 'textarea';
     }

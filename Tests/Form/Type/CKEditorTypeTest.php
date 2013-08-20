@@ -12,8 +12,7 @@
 namespace Ivory\CKEditorBundle\Tests\Form\Type;
 
 use Ivory\CKEditorBundle\Form\Type\CKEditorType;
-use Symfony\Component\Form\FormFactory;
-use Symfony\Component\Form\Extension\Core\CoreExtension;
+use Symfony\Component\Form\Forms;
 
 /**
  * CKEditor type test.
@@ -64,8 +63,9 @@ class CKEditorTypeTest extends \PHPUnit_Framework_TestCase
             $this->assetsVersionTrimerHelperMock
         );
 
-        $this->factory = new FormFactory(array(new CoreExtension()));
-        $this->factory->addType($this->ckEditorType);
+        $this->factory = Forms::createFormFactoryBuilder()
+            ->addType($this->ckEditorType)
+            ->getFormFactory();
     }
 
     /**
@@ -115,8 +115,11 @@ class CKEditorTypeTest extends \PHPUnit_Framework_TestCase
         $form = $this->factory->create('ckeditor');
         $view = $form->createView();
 
-        $this->assertSame('/bundles/ckeditor/', $view->get('base_path'));
-        $this->assertSame('/bundles/ckeditor/ckeditor.js?v=1', $view->get('js_path'));
+        $this->assertArrayHasKey('base_path', $view->vars);
+        $this->assertSame('/bundles/ckeditor/', $view->vars['base_path']);
+
+        $this->assertArrayHasKey('js_path', $view->vars);
+        $this->assertSame('/bundles/ckeditor/ckeditor.js?v=1', $view->vars['js_path']);
     }
 
     public function testBaseAndJsPathWithConfiguredAndExplicitValues()
@@ -147,8 +150,11 @@ class CKEditorTypeTest extends \PHPUnit_Framework_TestCase
 
         $view = $form->createView();
 
-        $this->assertSame('/foo/', $view->get('base_path'));
-        $this->assertSame('/foo/ckeditor.js?v=1', $view->get('js_path'));
+        $this->assertArrayHasKey('base_path', $view->vars);
+        $this->assertSame('/foo/', $view->vars['base_path']);
+
+        $this->assertArrayHasKey('js_path', $view->vars);
+        $this->assertSame('/foo/ckeditor.js?v=1', $view->vars['js_path']);
     }
 
     public function testDefaultConfig()
@@ -156,7 +162,8 @@ class CKEditorTypeTest extends \PHPUnit_Framework_TestCase
         $form = $this->factory->create('ckeditor');
         $view = $form->createView();
 
-        $this->assertEmpty(json_decode($view->get('config'), true));
+        $this->assertArrayHasKey('config', $view->vars);
+        $this->assertEmpty(json_decode($view->vars['config'], true));
     }
 
     public function testConfigWithExplicitConfig()
@@ -182,7 +189,8 @@ class CKEditorTypeTest extends \PHPUnit_Framework_TestCase
         $form = $this->factory->create('ckeditor', null, $options);
         $view = $form->createView();
 
-        $this->assertSame($options['config'], json_decode($view->get('config'), true));
+        $this->assertArrayHasKey('config', $view->vars);
+        $this->assertSame($options['config'], json_decode($view->vars['config'], true));
     }
 
     public function testConfigWithConfiguredConfig()
@@ -206,7 +214,8 @@ class CKEditorTypeTest extends \PHPUnit_Framework_TestCase
         $form = $this->factory->create('ckeditor', null, array('config_name' => 'default'));
         $view = $form->createView();
 
-        $this->assertSame($config, json_decode($view->get('config'), true));
+        $this->assertArrayHasKey('config', $view->vars);
+        $this->assertSame($config, json_decode($view->vars['config'], true));
     }
 
     public function testConfigWithDefaultConfiguredConfig()
@@ -235,7 +244,8 @@ class CKEditorTypeTest extends \PHPUnit_Framework_TestCase
         $form = $this->factory->create('ckeditor');
         $view = $form->createView();
 
-        $this->assertSame($options, json_decode($view->get('config'), true));
+        $this->assertArrayHasKey('config', $view->vars);
+        $this->assertSame($options, json_decode($view->vars['config'], true));
     }
 
     public function testConfigWithExplicitAndConfiguredConfig()
@@ -266,7 +276,8 @@ class CKEditorTypeTest extends \PHPUnit_Framework_TestCase
 
         $view = $form->createView();
 
-        $this->assertSame(array_merge($configuredConfig, $explicitConfig), json_decode($view->get('config'), true));
+        $this->assertArrayHasKey('config', $view->vars);
+        $this->assertSame(array_merge($configuredConfig, $explicitConfig), json_decode($view->vars['config'], true));
     }
 
     public function testDefaultPlugins()
@@ -274,7 +285,8 @@ class CKEditorTypeTest extends \PHPUnit_Framework_TestCase
         $form = $this->factory->create('ckeditor');
         $view = $form->createView();
 
-        $this->assertEmpty($view->get('plugins'));
+        $this->assertArrayHasKey('plugins', $view->vars);
+        $this->assertEmpty($view->vars['plugins']);
     }
 
     public function testPluginsWithExplicitPlugins()
@@ -300,7 +312,8 @@ class CKEditorTypeTest extends \PHPUnit_Framework_TestCase
 
         $view = $form->createView();
 
-        $this->assertSame($plugins, $view->get('plugins'));
+        $this->assertArrayHasKey('plugins', $view->vars);
+        $this->assertSame($plugins, $view->vars['plugins']);
     }
 
     public function testPluginsWithConfiguredPlugins()
@@ -320,7 +333,8 @@ class CKEditorTypeTest extends \PHPUnit_Framework_TestCase
         $form = $this->factory->create('ckeditor');
         $view = $form->createView();
 
-        $this->assertSame($plugins, $view->get('plugins'));
+        $this->assertArrayHasKey('plugins', $view->vars);
+        $this->assertSame($plugins, $view->vars['plugins']);
     }
 
     public function testPluginsWithConfiguredAndExplicitPlugins()
@@ -352,7 +366,8 @@ class CKEditorTypeTest extends \PHPUnit_Framework_TestCase
         $form = $this->factory->create('ckeditor', null, array('plugins' => $explicitPlugins));
         $view = $form->createView();
 
-        $this->assertSame(array_merge($explicitPlugins, $configuredPlugins), $view->get('plugins'));
+        $this->assertArrayHasKey('plugins', $view->vars);
+        $this->assertSame(array_merge($explicitPlugins, $configuredPlugins), $view->vars['plugins']);
     }
 
     public function testConfiguredDisable()
@@ -375,9 +390,11 @@ class CKEditorTypeTest extends \PHPUnit_Framework_TestCase
         $form = $this->factory->create('ckeditor', null, $options);
         $view = $form->createView();
 
-        $this->assertFalse($view->get('enable'));
-        $this->assertFalse($view->has('config'));
-        $this->assertFalse($view->has('plugins'));
+        $this->assertArrayHasKey('enable', $view->vars);
+        $this->assertFalse($view->vars['enable']);
+
+        $this->assertArrayNotHasKey('config', $view->vars);
+        $this->assertArrayNotHasKey('plugins', $view->vars);
     }
 
     public function testExplicitDisable()
@@ -399,8 +416,10 @@ class CKEditorTypeTest extends \PHPUnit_Framework_TestCase
         $form = $this->factory->create('ckeditor', null, $options);
         $view = $form->createView();
 
-        $this->assertFalse($view->get('enable'));
-        $this->assertFalse($view->has('config'));
-        $this->assertFalse($view->has('plugins'));
+        $this->assertArrayHasKey('enable', $view->vars);
+        $this->assertFalse($view->vars['enable']);
+
+        $this->assertArrayNotHasKey('config', $view->vars);
+        $this->assertArrayNotHasKey('plugins', $view->vars);
     }
 }

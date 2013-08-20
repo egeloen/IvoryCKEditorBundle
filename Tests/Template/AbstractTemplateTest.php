@@ -43,6 +43,7 @@ abstract class AbstractTemplateTest extends \PHPUnit_Framework_TestCase
     {
         $output = $this->renderTemplate(
             array(
+                'form'      => $this->getMock('Symfony\Component\Form\FormView'),
                 'id'        => 'id',
                 'value'     => 'value',
                 'enable'    => true,
@@ -75,6 +76,7 @@ EOF;
     {
         $output = $this->renderTemplate(
             array(
+                'form'      => $this->getMock('Symfony\Component\Form\FormView'),
                 'id'        => 'id',
                 'value'     => 'value',
                 'enable'    => true,
@@ -106,7 +108,14 @@ EOF;
 
     public function testRenderWithDisableWidget()
     {
-        $output = $this->renderTemplate(array('id' => 'id', 'value' => 'value', 'enable' => false));
+        $output = $this->renderTemplate(
+            array(
+                'form'   => $this->getMock('Symfony\Component\Form\FormView'),
+                'id'     => 'id',
+                'value'  => 'value',
+                'enable' => false,
+            )
+        );
 
         $expected = <<<EOF
 <textarea >value</textarea>
