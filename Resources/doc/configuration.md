@@ -58,7 +58,7 @@ keywork as toolbar.
 ivory_ck_editor:
     configs:
         my_config:
-            toolbar: standard
+            toolbar: [standard]
 ```
 
 Here, the toolbar will be rendered as it is defined in the standard edition. If you want to define your own toolbar,
