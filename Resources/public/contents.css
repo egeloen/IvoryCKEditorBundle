@@ -18,6 +18,8 @@ body
 	margin: 20px;
 }
 
+.cke_contents{-webkit-transform: translate3d(0,0,0) !important;}
+
 .cke_editable
 {
 	font-size: 13px;
