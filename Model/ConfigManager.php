@@ -11,8 +11,10 @@
 
 namespace Ivory\CKEditorBundle\Model;
 
+use Ivory\CKEditorBundle\Model\ConfigManagerInterface;
 use Ivory\CKEditorBundle\Exception\ConfigManagerException;
 use Ivory\CKEditorBundle\Helper\AssetsVersionTrimerHelper;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Templating\Helper\CoreAssetsHelper;
 
@@ -32,6 +34,9 @@ class ConfigManager implements ConfigManagerInterface
     /** @var \Symfony\Component\Routing\RouterInterface */
     protected $router;
 
+    /** @var \Symfony\Component\HttpFoundation\Request */
+    protected $request;
+
     /** @var string */
     protected $defaultConfig;
 
@@ -44,6 +49,7 @@ class ConfigManager implements ConfigManagerInterface
      * @param \Symfony\Component\Templating\Helper\CoreAssetsHelper  $assetsHelper              The assets helper.
      * @param \Ivory\CKEditorBundle\Helper\AssetsVersionTrimerHelper $assetsVersionTrimerHelper The version trimer.
      * @param \Symfony\Component\Routing\RouterInterface             $router                    The router.
+     * @param \Symfony\Component\HttpFoundation\Request              $request                   The request.
      * @param array                                                  $configs                   The CKEditor configs.
      * @param string                                                 $defaultConfig             The default config name.
      */
@@ -51,12 +57,14 @@ class ConfigManager implements ConfigManagerInterface
         CoreAssetsHelper $assetsHelper,
         AssetsVersionTrimerHelper $assetsVersionTrimerHelper,
         RouterInterface $router,
+        Request $request,
         array $configs = array(),
         $defaultConfig = null
     ) {
         $this->setAssetsHelper($assetsHelper);
         $this->setAssetsVersionTrimerHelper($assetsVersionTrimerHelper);
         $this->setRouter($router);
+        $this->setRequest($request);
         $this->setConfigs($configs);
 
         if ($defaultConfig !== null) {
@@ -122,6 +130,26 @@ class ConfigManager implements ConfigManagerInterface
     public function setRouter(RouterInterface $router)
     {
         $this->router = $router;
+    }
+
+    /**
+     * Gets the request.
+     *
+     * @return \Symfony\Component\HttpFoundation\Request The request.
+     */
+    public function getRequest()
+    {
+        return $this->request;
+    }
+
+    /**
+     * Sets the request.
+     *
+     * @param \Symfony\Component\HttpFoundation\Request $request The request.
+     */
+    public function setRequest(Request $request)
+    {
+        $this->request = $request;
     }
 
     /**
@@ -247,7 +275,12 @@ class ConfigManager implements ConfigManagerInterface
             if (isset($config[$filebrowserRoute])) {
                 $filebrowserRouteParameters = 'filebrowser'.$key.'RouteParameters';
                 $filebrowserRouteAbsolute = 'filebrowser'.$key.'RouteAbsolute';
-
+                foreach ($config[$filebrowserRouteParameters] as $key => $value) {
+                    if (is_int($key) && $this->getRequest()->attributes->get($value)) {
+                        unset($config[$filebrowserRouteParameters][$key]);
+                        $config[$filebrowserRouteParameters][$value] = $this->getRequest()->attributes->get($value);
+                    }
+                }
                 $config['filebrowser'.$key.'Url'] = $router->generate(
                     $config[$filebrowserRoute],
                     isset($config[$filebrowserRouteParameters]) ? $config[$filebrowserRouteParameters] : array(),
