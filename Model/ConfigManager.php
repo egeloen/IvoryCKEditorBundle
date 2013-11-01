@@ -271,13 +271,12 @@ class ConfigManager implements ConfigManagerInterface
     {
         $filebrowser = function ($key, array &$config, RouterInterface $router) {
             $filebrowserRoute = 'filebrowser'.$key.'Route';
-
             if (isset($config[$filebrowserRoute])) {
                 $filebrowserRouteParameters = 'filebrowser'.$key.'RouteParameters';
                 $filebrowserRouteAbsolute = 'filebrowser'.$key.'RouteAbsolute';
-                foreach ($config[$filebrowserRouteParameters] as $key => $value) {
-                    if (is_int($key) && $this->getRequest()->attributes->get($value)) {
-                        unset($config[$filebrowserRouteParameters][$key]);
+                foreach ($config[$filebrowserRouteParameters] as $parameter => $value) {
+                    if (is_int($parameter) && $this->getRequest()->attributes->get($value)) {
+                        unset($config[$filebrowserRouteParameters][$parameter]);
                         $config[$filebrowserRouteParameters][$value] = $this->getRequest()->attributes->get($value);
                     }
                 }
