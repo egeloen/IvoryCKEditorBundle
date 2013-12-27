@@ -37,6 +37,9 @@ class ConfigManager implements ConfigManagerInterface
 
     /** @var array */
     protected $configs;
+    
+    /** @var array */
+    protected $generatedAssetsUrls = [];
 
     /**
      * Creates a CKEditor config manager.
@@ -223,9 +226,16 @@ class ConfigManager implements ConfigManagerInterface
 
             $config['contentsCss'] = array();
             foreach ($cssContents as $cssContent) {
-                $config['contentsCss'][] = $this->assetsVersionTrimerHelper->trim(
-                    $this->assetsHelper->getUrl($cssContent)
-                );
+                if (in_array($cssContent, $this->generatedAssetsUrls)) {
+                    $config['contentsCss'][] = $cssContent;
+                } else {
+                    $generatedCssContent = $this->assetsVersionTrimerHelper->trim(
+                        $this->assetsHelper->getUrl($cssContent)
+                    );
+                    
+                    $this->generatedAssetsUrls[$cssContent] = $generatedCssContent;
+                    $config['contentsCss'][]                = $generatedCssContent;
+                }
             }
         }
 
