@@ -168,7 +168,7 @@ EOF;
      */
     public function renderStylesSet($name, array $stylesSet)
     {
-        return sprintf('CKEDITOR.stylesSet.add("%s", %s);', $name, json_encode($stylesSet));
+        return sprintf('if (null === CKEDITOR.stylesSet.get("%s")) { CKEDITOR.stylesSet.add("%s", %s); }', $name, $name, json_encode($stylesSet));
     }
 
     /**
