@@ -115,7 +115,7 @@ class CKEditorHelper extends Helper
 
         $this->fixConfigEscapedValues($config);
 
-        return sprintf('CKEDITOR.inline("%s", %s);', $id, $this->fixConfigConstants($this->jsonBuilder->build()));
+        return sprintf('CKEDITOR.disableAutoInline = true; CKEDITOR.inline("%s", %s);', $id, $this->fixConfigConstants($this->jsonBuilder->build()));
     }
 
     /**
