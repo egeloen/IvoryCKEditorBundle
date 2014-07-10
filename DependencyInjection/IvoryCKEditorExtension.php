@@ -37,6 +37,7 @@ class IvoryCKEditorExtension extends ConfigurableExtension
         $container->setParameter('ivory_ck_editor.form.type.enable', $config['enable']);
         $container->setParameter('ivory_ck_editor.form.type.base_path', $config['base_path']);
         $container->setParameter('ivory_ck_editor.form.type.js_path', $config['js_path']);
+        $container->setParameter('ivory_ck_editor.form.type.inline', $config['inline']);
 
         $this->registerResources($container);
 

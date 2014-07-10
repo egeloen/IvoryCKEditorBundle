@@ -37,6 +37,9 @@ class CKEditorType extends AbstractType
     /** @var string */
     protected $jsPath;
 
+    /** @var boolean */
+    protected $inline;
+
     /** @var \Ivory\CKEditorBundle\Model\ConfigManagerInterface */
     protected $configManager;
 
@@ -55,6 +58,7 @@ class CKEditorType extends AbstractType
      * @param boolean                                               $enable           The enable flag.
      * @param string                                                $basePath         The CKEditor base path.
      * @param string                                                $jsPath           The CKEditor JS path.
+     * @param boolean                                               $inline           The CKEditor inline flag.
      * @param \Ivory\CKEditorBundle\Model\ConfigManagerInterface    $configManager    The config manager.
      * @param \Ivory\CKEditorBundle\Model\PluginManagerInterface    $pluginManager    The plugin manager.
      * @param \Ivory\CKEditorBundle\Model\StylesSetManagerInterface $stylesSetManager The styles set manager.
@@ -64,6 +68,7 @@ class CKEditorType extends AbstractType
         $enable,
         $basePath,
         $jsPath,
+        $inline,
         ConfigManagerInterface $configManager,
         PluginManagerInterface $pluginManager,
         StylesSetManagerInterface $stylesSetManager,
@@ -72,6 +77,7 @@ class CKEditorType extends AbstractType
         $this->isEnable($enable);
         $this->setBasePath($basePath);
         $this->setJsPath($jsPath);
+        $this->setInline($inline);
         $this->setConfigManager($configManager);
         $this->setPluginManager($pluginManager);
         $this->setStylesSetManager($stylesSetManager);
@@ -132,6 +138,14 @@ class CKEditorType extends AbstractType
     public function setJsPath($jsPath)
     {
         $this->jsPath = $jsPath;
+    }
+
+    public function getInline () {
+        return $this->inline;
+    }
+
+    public function setInline ($inline) {
+        $this->inline = $inline;
     }
 
     /**
@@ -224,6 +238,7 @@ class CKEditorType extends AbstractType
         if ($builder->getAttribute('enable')) {
             $builder->setAttribute('base_path', $options['base_path']);
             $builder->setAttribute('js_path', $options['js_path']);
+            $builder->setAttribute('inline', $options['inline']);
 
             $config = $options['config'];
             if ($options['config_name'] === null) {
@@ -256,6 +271,7 @@ class CKEditorType extends AbstractType
         if ($form->getConfig()->getAttribute('enable')) {
             $view->vars['base_path'] = $form->getConfig()->getAttribute('base_path');
             $view->vars['js_path'] = $form->getConfig()->getAttribute('js_path');
+            $view->vars['inline'] = $form->getConfig()->getAttribute('inline');
             $view->vars['config'] = $form->getConfig()->getAttribute('config');
             $view->vars['plugins'] = $form->getConfig()->getAttribute('plugins');
             $view->vars['styles'] = $form->getConfig()->getAttribute('styles');
@@ -273,6 +289,7 @@ class CKEditorType extends AbstractType
                 'enable'      => $this->enable,
                 'base_path'   => $this->basePath,
                 'js_path'     => $this->jsPath,
+                'inline'      => $this->inline,
                 'config_name' => $this->configManager->getDefaultConfig(),
                 'config'      => array(),
                 'plugins'     => array(),
@@ -284,6 +301,7 @@ class CKEditorType extends AbstractType
                 'config_name' => array('string', 'null'),
                 'base_path'   => array('string'),
                 'js_path'     => array('string'),
+                'inline'      => 'bool',
                 'config'      => 'array',
                 'plugins'     => 'array',
                 'styles'      => 'array',

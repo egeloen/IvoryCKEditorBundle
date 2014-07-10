@@ -34,6 +34,7 @@ class Configuration implements ConfigurationInterface
                 ->scalarNode('base_path')->defaultValue('bundles/ivoryckeditor/')->end()
                 ->scalarNode('js_path')->defaultValue('bundles/ivoryckeditor/ckeditor.js')->end()
                 ->scalarNode('default_config')->end()
+                ->scalarNode('inline')->defaultValue(false)->end()
                 ->append($this->createConfigsNode())
                 ->append($this->createPluginsNode())
                 ->append($this->createStylesNode())

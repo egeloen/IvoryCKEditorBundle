@@ -98,6 +98,27 @@ class CKEditorHelper extends Helper
     }
 
     /**
+     * Renders the inline command.
+     *
+     * @param string $id     The identifier.
+     * @param array  $config The config.
+     *
+     * @return string The rendered replace.
+     */
+    public function renderInline($id, array $config)
+    {
+        $this->loaded = true;
+
+        $this->jsonBuilder
+            ->reset()
+            ->setValues($this->fixConfigFilebrowsers($this->fixConfigContentsCss($config)));
+
+        $this->fixConfigEscapedValues($config);
+
+        return sprintf('CKEDITOR.inline("%s", %s);', $id, $this->fixConfigConstants($this->jsonBuilder->build()));
+    }
+
+    /**
      * Renders the destroy.
      *
      * @param string $id The identifier.

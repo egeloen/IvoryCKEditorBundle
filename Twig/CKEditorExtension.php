@@ -45,6 +45,7 @@ class CKEditorExtension extends \Twig_Extension
             new \Twig_SimpleFunction('ckeditor_base_path', array($this, 'renderBasePath'), $options),
             new \Twig_SimpleFunction('ckeditor_js_path', array($this, 'renderJsPath'), $options),
             new \Twig_SimpleFunction('ckeditor_replace', array($this, 'renderReplace'), $options),
+            new \Twig_SimpleFunction('ckeditor_inline', array($this, 'renderInline'), $options),
             new \Twig_SimpleFunction('ckeditor_destroy', array($this, 'renderDestroy'), $options),
             new \Twig_SimpleFunction('ckeditor_plugin', array($this, 'renderPlugin'), $options),
             new \Twig_SimpleFunction('ckeditor_styles_set', array($this, 'renderStylesSet'), $options),
@@ -97,6 +98,19 @@ class CKEditorExtension extends \Twig_Extension
     public function renderReplace($id, array $config)
     {
         return $this->helper->renderReplace($id, $config);
+    }
+
+    /**
+     * Renders the inline command.
+     *
+     * @param string $id     The identifier.
+     * @param array  $config The config.
+     *
+     * @return string The rendered inline command.
+     */
+    public function renderInline($id, array $config)
+    {
+        return $this->helper->renderInline($id, $config);
     }
 
     /**
