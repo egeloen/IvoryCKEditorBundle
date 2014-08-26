@@ -245,6 +245,7 @@ class CKEditorType extends AbstractType
 
         if ($builder->getAttribute('enable')) {
             $builder->setAttribute('autoload', $options['autoload']);
+            $builder->setAttribute('embedded', $options['embedded']);
             $builder->setAttribute('base_path', $options['base_path']);
             $builder->setAttribute('js_path', $options['js_path']);
 
@@ -278,6 +279,7 @@ class CKEditorType extends AbstractType
 
         if ($form->getConfig()->getAttribute('enable')) {
             $view->vars['autoload'] = $form->getConfig()->getAttribute('autoload');
+            $view->vars['embedded'] = $form->getConfig()->getAttribute('embedded');
             $view->vars['base_path'] = $form->getConfig()->getAttribute('base_path');
             $view->vars['js_path'] = $form->getConfig()->getAttribute('js_path');
             $view->vars['config'] = $form->getConfig()->getAttribute('config');
@@ -296,6 +298,7 @@ class CKEditorType extends AbstractType
             ->setDefaults(array(
                 'enable'      => $this->enable,
                 'autoload'    => $this->autoload,
+                'embedded'    => false,
                 'base_path'   => $this->basePath,
                 'js_path'     => $this->jsPath,
                 'config_name' => $this->configManager->getDefaultConfig(),
@@ -307,6 +310,7 @@ class CKEditorType extends AbstractType
             ->addAllowedTypes(array(
                 'enable'      => 'bool',
                 'autoload'    => 'bool',
+                'embedded'    => 'bool',
                 'config_name' => array('string', 'null'),
                 'base_path'   => array('string'),
                 'js_path'     => array('string'),
