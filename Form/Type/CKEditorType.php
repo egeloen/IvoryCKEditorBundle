@@ -11,6 +11,7 @@
 
 namespace Ivory\CKEditorBundle\Form\Type;
 
+use Ivory\CKEditorBundle\Form\DataTransformer\EnsureHtmlTransformer;
 use Ivory\CKEditorBundle\Model\ConfigManagerInterface;
 use Ivory\CKEditorBundle\Model\PluginManagerInterface;
 use Ivory\CKEditorBundle\Model\StylesSetManagerInterface;
@@ -258,6 +259,8 @@ class CKEditorType extends AbstractType
             $builder->setAttribute('plugins', $this->pluginManager->getPlugins());
             $builder->setAttribute('styles', $this->stylesSetManager->getStylesSets());
             $builder->setAttribute('templates', $this->templateManager->getTemplates());
+
+            $builder->addModelTransformer(new EnsureHtmlTransformer());
         }
     }
 
