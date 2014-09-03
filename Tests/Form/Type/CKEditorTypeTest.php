@@ -27,17 +27,17 @@ class CKEditorTypeTest extends \PHPUnit_Framework_TestCase
     /** @var \Ivory\CKEditorBundle\Form\Type\CKEditorType */
     protected $ckEditorType;
 
-    /** @var \Ivory\CKEditorBundle\Model\ConfigManager */
+    /** @var \Ivory\CKEditorBundle\Model\ConfigManagerInterface|\PHPUnit_Framework_MockObject_MockObject */
     protected $configManagerMock;
 
-    /** @var \Ivory\CKEditorBundle\Model\PluginManager */
+    /** @var \Ivory\CKEditorBundle\Model\PluginManagerInterface|\PHPUnit_Framework_MockObject_MockObject */
     protected $pluginManagerMock;
 
-    /** @var \Symfony\Component\Templating\Helper\CoreAssetsHelper */
-    protected $assetsHelperMock;
+    /** @var \Ivory\CKEditorBundle\Model\StylesSetManagerInterface|\PHPUnit_Framework_MockObject_MockObject */
+    protected $stylesSetManagerMock;
 
-    /** @var \Ivory\CKEditorBundle\Helper\AssetsVersionTrimerHelper */
-    protected $assetsVersionTrimerHelperMock;
+    /** @var \Ivory\CKEditorBundle\Model\TemplateManagerInterface|\PHPUnit_Framework_MockObject_MockObject */
+    protected $templateManagerMock;
 
     /**
      * {@inheritdooc}
@@ -46,21 +46,18 @@ class CKEditorTypeTest extends \PHPUnit_Framework_TestCase
     {
         $this->configManagerMock = $this->getMock('Ivory\CKEditorBundle\Model\ConfigManagerInterface');
         $this->pluginManagerMock = $this->getMock('Ivory\CKEditorBundle\Model\PluginManagerInterface');
-
-        $this->assetsHelperMock = $this->getMockBuilder('Symfony\Component\Templating\Helper\CoreAssetsHelper')
-            ->disableOriginalConstructor()
-            ->getMock();
-
-        $this->assetsVersionTrimerHelperMock = $this->getMock('Ivory\CKEditorBundle\Helper\AssetsVersionTrimerHelper');
+        $this->stylesSetManagerMock = $this->getMock('Ivory\CKEditorBundle\Model\StylesSetManagerInterface');
+        $this->templateManagerMock = $this->getMock('Ivory\CKEditorBundle\Model\TemplateManagerInterface');
 
         $this->ckEditorType = new CKEditorType(
+            true,
             true,
             'bundles/ckeditor/',
             'bundles/ckeditor/ckeditor.js',
             $this->configManagerMock,
             $this->pluginManagerMock,
-            $this->assetsHelperMock,
-            $this->assetsVersionTrimerHelperMock
+            $this->stylesSetManagerMock,
+            $this->templateManagerMock
         );
 
         $this->factory = Forms::createFormFactoryBuilder()
@@ -73,10 +70,10 @@ class CKEditorTypeTest extends \PHPUnit_Framework_TestCase
      */
     protected function tearDown()
     {
-        unset($this->assetsVersionTrimerHelperMock);
-        unset($this->assetsHelperMock);
         unset($this->configManagerMock);
         unset($this->pluginManagerMock);
+        unset($this->stylesSetManagerMock);
+        unset($this->templateManagerMock);
         unset($this->ckEditorType);
         unset($this->factory);
     }
@@ -84,64 +81,49 @@ class CKEditorTypeTest extends \PHPUnit_Framework_TestCase
     public function testInitialState()
     {
         $this->assertTrue($this->ckEditorType->isEnable());
+        $this->assertTrue($this->ckEditorType->isAutoload());
         $this->assertSame('bundles/ckeditor/', $this->ckEditorType->getBasePath());
         $this->assertSame('bundles/ckeditor/ckeditor.js', $this->ckEditorType->getJsPath());
         $this->assertSame($this->configManagerMock, $this->ckEditorType->getConfigManager());
         $this->assertSame($this->pluginManagerMock, $this->ckEditorType->getPluginManager());
-        $this->assertSame($this->assetsHelperMock, $this->ckEditorType->getAssetsHelper());
-        $this->assertSame($this->assetsVersionTrimerHelperMock, $this->ckEditorType->getAssetsVersionTrimerHelper());
+        $this->assertSame($this->stylesSetManagerMock, $this->ckEditorType->getStylesSetManager());
+        $this->assertSame($this->templateManagerMock, $this->ckEditorType->getTemplateManager());
     }
 
-    public function testBaseAndJsPathWithConfiguredValues()
+    public function testAutoloadWithConfiguredValue()
     {
-        $this->assetsHelperMock
-            ->expects($this->any())
-            ->method('getUrl')
-            ->will(
-                $this->returnValueMap(
-                    array(
-                        array('bundles/ckeditor/', null, '/bundles/ckeditor/?v=1'),
-                        array('bundles/ckeditor/ckeditor.js', null, '/bundles/ckeditor/ckeditor.js?v=1')
-                    )
-                )
-            );
-
-        $this->assetsVersionTrimerHelperMock
-            ->expects($this->once())
-            ->method('trim')
-            ->with($this->equalTo('/bundles/ckeditor/?v=1'))
-            ->will($this->returnValue('/bundles/ckeditor/'));
+        $this->ckEditorType->isAutoload(false);
 
         $form = $this->factory->create('ckeditor');
         $view = $form->createView();
 
+        $this->assertArrayHasKey('autoload', $view->vars);
+        $this->assertFalse($view->vars['autoload']);
+    }
+
+    public function testEnableWithConfiguredAndExplicitValue()
+    {
+        $form = $this->factory->create('ckeditor', null, array('enable' => false));
+        $view = $form->createView();
+
+        $this->assertArrayHasKey('enable', $view->vars);
+        $this->assertFalse($view->vars['enable']);
+    }
+
+    public function testBaseAndJsPathWithConfiguredValues()
+    {
+        $form = $this->factory->create('ckeditor');
+        $view = $form->createView();
+
         $this->assertArrayHasKey('base_path', $view->vars);
-        $this->assertSame('/bundles/ckeditor/', $view->vars['base_path']);
+        $this->assertSame('bundles/ckeditor/', $view->vars['base_path']);
 
         $this->assertArrayHasKey('js_path', $view->vars);
-        $this->assertSame('/bundles/ckeditor/ckeditor.js?v=1', $view->vars['js_path']);
+        $this->assertSame('bundles/ckeditor/ckeditor.js', $view->vars['js_path']);
     }
 
     public function testBaseAndJsPathWithConfiguredAndExplicitValues()
     {
-        $this->assetsHelperMock
-            ->expects($this->any())
-            ->method('getUrl')
-            ->will(
-                $this->returnValueMap(
-                    array(
-                        array('foo/', null, '/foo/?v=1'),
-                        array('foo/ckeditor.js', null, '/foo/ckeditor.js?v=1')
-                    )
-                )
-            );
-
-        $this->assetsVersionTrimerHelperMock
-            ->expects($this->once())
-            ->method('trim')
-            ->with($this->equalTo('/foo/?v=1'))
-            ->will($this->returnValue('/foo/'));
-
         $form = $this->factory->create(
             'ckeditor',
             null,
@@ -151,10 +133,10 @@ class CKEditorTypeTest extends \PHPUnit_Framework_TestCase
         $view = $form->createView();
 
         $this->assertArrayHasKey('base_path', $view->vars);
-        $this->assertSame('/foo/', $view->vars['base_path']);
+        $this->assertSame('foo/', $view->vars['base_path']);
 
         $this->assertArrayHasKey('js_path', $view->vars);
-        $this->assertSame('/foo/ckeditor.js?v=1', $view->vars['js_path']);
+        $this->assertSame('foo/ckeditor.js', $view->vars['js_path']);
     }
 
     public function testDefaultConfig()
@@ -190,7 +172,7 @@ class CKEditorTypeTest extends \PHPUnit_Framework_TestCase
         $view = $form->createView();
 
         $this->assertArrayHasKey('config', $view->vars);
-        $this->assertSame($options['config'], json_decode($view->vars['config'], true));
+        $this->assertSame($options['config'], $view->vars['config']);
     }
 
     public function testConfigWithConfiguredConfig()
@@ -215,7 +197,7 @@ class CKEditorTypeTest extends \PHPUnit_Framework_TestCase
         $view = $form->createView();
 
         $this->assertArrayHasKey('config', $view->vars);
-        $this->assertSame($config, json_decode($view->vars['config'], true));
+        $this->assertSame($config, $view->vars['config']);
     }
 
     public function testConfigWithDefaultConfiguredConfig()
@@ -245,7 +227,7 @@ class CKEditorTypeTest extends \PHPUnit_Framework_TestCase
         $view = $form->createView();
 
         $this->assertArrayHasKey('config', $view->vars);
-        $this->assertSame($options, json_decode($view->vars['config'], true));
+        $this->assertSame($options, $view->vars['config']);
     }
 
     public function testConfigWithExplicitAndConfiguredConfig()
@@ -277,7 +259,7 @@ class CKEditorTypeTest extends \PHPUnit_Framework_TestCase
         $view = $form->createView();
 
         $this->assertArrayHasKey('config', $view->vars);
-        $this->assertSame(array_merge($configuredConfig, $explicitConfig), json_decode($view->vars['config'], true));
+        $this->assertSame(array_merge($configuredConfig, $explicitConfig), $view->vars['config']);
     }
 
     public function testDefaultPlugins()
@@ -370,6 +352,195 @@ class CKEditorTypeTest extends \PHPUnit_Framework_TestCase
         $this->assertSame(array_merge($explicitPlugins, $configuredPlugins), $view->vars['plugins']);
     }
 
+    public function testDefaultStylesSet()
+    {
+        $form = $this->factory->create('ckeditor');
+        $view = $form->createView();
+
+        $this->assertEmpty($view->vars['styles']);
+    }
+
+    public function testPluginsWithExplicitStylesSet()
+    {
+        $stylesSets = array(
+            'default' => array(
+                array('name' => 'Blue Title', 'element' => 'h2', 'styles' => array('color' => 'Blue')),
+                array('name' => 'CSS Style', 'element' => 'span', 'attributes' => array('class' => 'my_style')),
+            ),
+        );
+
+        $this->stylesSetManagerMock
+            ->expects($this->once())
+            ->method('setStylesSets')
+            ->with($this->equalTo($stylesSets));
+
+        $this->stylesSetManagerMock
+            ->expects($this->once())
+            ->method('getStylesSets')
+            ->will($this->returnValue($stylesSets));
+
+        $form = $this->factory->create('ckeditor', null, array('styles' => $stylesSets));
+
+        $view = $form->createView();
+
+        $this->assertSame($stylesSets, $view->vars['styles']);
+    }
+
+    public function testPluginsWithConfiguredStylesSets()
+    {
+        $stylesSets = array(
+            'default' => array(
+                array('name' => 'Blue Title', 'element' => 'h2', 'styles' => array('color' => 'Blue')),
+                array('name' => 'CSS Style', 'element' => 'span', 'attributes' => array('class' => 'my_style')),
+            ),
+        );
+
+        $this->stylesSetManagerMock
+            ->expects($this->once())
+            ->method('getStylesSets')
+            ->will($this->returnValue($stylesSets));
+
+        $form = $this->factory->create('ckeditor');
+        $view = $form->createView();
+
+        $this->assertSame($stylesSets, $view->vars['styles']);
+    }
+
+    public function testPluginsWithConfiguredAndExplicitStylesSets()
+    {
+        $configuredStylesSets = array(
+            'foo' => array(
+                array('name' => 'Blue Title', 'element' => 'h2', 'styles' => array('color' => 'Blue')),
+            ),
+        );
+
+        $explicitStylesSets = array(
+            'bar' => array(
+                array('name' => 'CSS Style', 'element' => 'span', 'attributes' => array('class' => 'my_style')),
+            ),
+        );
+
+        $this->stylesSetManagerMock
+            ->expects($this->once())
+            ->method('setStylesSets')
+            ->with($this->equalTo($explicitStylesSets));
+
+        $this->stylesSetManagerMock
+            ->expects($this->once())
+            ->method('getStylesSets')
+            ->will($this->returnValue(array_merge($explicitStylesSets, $configuredStylesSets)));
+
+        $form = $this->factory->create('ckeditor', null, array('styles' => $explicitStylesSets));
+        $view = $form->createView();
+
+        $this->assertSame(array_merge($explicitStylesSets, $configuredStylesSets), $view->vars['styles']);
+    }
+
+    public function testDefaultTemplates()
+    {
+        $form = $this->factory->create('ckeditor');
+        $view = $form->createView();
+
+        $this->assertEmpty($view->vars['templates']);
+    }
+
+    public function testTemplatesWithExplicitTemplates()
+    {
+        $templates = array(
+            'default' => array(
+                'imagesPath' => '/my/path',
+                'templates'  => array(
+                    array(
+                        'title' => 'My Template',
+                        'html'  => '<h1>Template</h1><p>Type your text here.</p>',
+                    )
+                ),
+            ),
+        );
+
+        $this->templateManagerMock
+            ->expects($this->once())
+            ->method('setTemplates')
+            ->with($this->equalTo($templates));
+
+        $this->templateManagerMock
+            ->expects($this->once())
+            ->method('getTemplates')
+            ->will($this->returnValue($templates));
+
+        $form = $this->factory->create('ckeditor', null, array('templates' => $templates));
+
+        $view = $form->createView();
+
+        $this->assertSame($templates, $view->vars['templates']);
+    }
+
+    public function testTemplatesWithConfiguredTemplates()
+    {
+        $templates = array(
+            'default' => array(
+                'imagesPath' => '/my/path',
+                'templates'  => array(
+                    array(
+                        'title' => 'My Template',
+                        'html'  => '<h1>Template</h1><p>Type your text here.</p>',
+                    ),
+                ),
+            ),
+        );
+
+        $this->templateManagerMock
+            ->expects($this->once())
+            ->method('getTemplates')
+            ->will($this->returnValue($templates));
+
+        $form = $this->factory->create('ckeditor');
+        $view = $form->createView();
+
+        $this->assertSame($templates, $view->vars['templates']);
+    }
+
+    public function testTemplatesWithConfiguredAndExplicitTemplates()
+    {
+        $configuredTemplates = array(
+            'default' => array(
+                'imagesPath' => '/my/path',
+                'templates'  => array(
+                    array(
+                        'title' => 'My Template',
+                        'html'  => '<h1>Template</h1><p>Type your text here.</p>',
+                    ),
+                ),
+            ),
+        );
+
+        $explicitTemplates = array(
+            'extra' => array(
+                'templates'  => array(
+                    array(
+                        'title' => 'My Extra Template',
+                        'html'  => '<h2>Template</h2><p>Type your text here.</p>',
+                    )
+                ),
+            ),
+        );
+
+        $this->templateManagerMock
+            ->expects($this->once())
+            ->method('setTemplates')
+            ->with($this->equalTo($explicitTemplates));
+
+        $this->templateManagerMock
+            ->expects($this->once())
+            ->method('getTemplates')
+            ->will($this->returnValue(array_merge($explicitTemplates, $configuredTemplates)));
+
+        $form = $this->factory->create('ckeditor', null, array('templates' => $explicitTemplates));
+        $view = $form->createView();
+
+        $this->assertSame(array_merge($explicitTemplates, $configuredTemplates), $view->vars['templates']);
+    }
+
     public function testConfiguredDisable()
     {
         $this->ckEditorType->isEnable(false);
@@ -393,8 +564,11 @@ class CKEditorTypeTest extends \PHPUnit_Framework_TestCase
         $this->assertArrayHasKey('enable', $view->vars);
         $this->assertFalse($view->vars['enable']);
 
+        $this->assertArrayNotHasKey('autoload', $view->vars);
         $this->assertArrayNotHasKey('config', $view->vars);
         $this->assertArrayNotHasKey('plugins', $view->vars);
+        $this->assertArrayNotHasKey('stylesheets', $view->vars);
+        $this->assertArrayNotHasKey('templates', $view->vars);
     }
 
     public function testExplicitDisable()
@@ -419,7 +593,10 @@ class CKEditorTypeTest extends \PHPUnit_Framework_TestCase
         $this->assertArrayHasKey('enable', $view->vars);
         $this->assertFalse($view->vars['enable']);
 
+        $this->assertArrayNotHasKey('autoload', $view->vars);
         $this->assertArrayNotHasKey('config', $view->vars);
         $this->assertArrayNotHasKey('plugins', $view->vars);
+        $this->assertArrayNotHasKey('stylesheets', $view->vars);
+        $this->assertArrayNotHasKey('templates', $view->vars);
     }
 }

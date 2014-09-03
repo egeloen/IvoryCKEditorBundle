@@ -25,7 +25,7 @@ class PhpTemplateTest extends AbstractTemplateTest
     /** @var \Symfony\Component\Templating\PhpEngine */
     protected $phpEngine;
 
-    /** @var \Symfony\Bundle\FrameworkBundle\Templating\Helper\FormHelper */
+    /** @var \Symfony\Bundle\FrameworkBundle\Templating\Helper\FormHelper|\PHPUnit_Framework_MockObject_MockObject */
     protected $formHelperMock;
 
     /**
@@ -33,21 +33,20 @@ class PhpTemplateTest extends AbstractTemplateTest
      */
     protected function setUp()
     {
-        $this->phpEngine = new PhpEngine(
-            new TemplateNameParser(),
-            new FilesystemLoader(__DIR__.'/../../Resources/views/Form/%name%')
-        );
+        parent::setUp();
 
         $this->formHelperMock = $this->getMockBuilder('Symfony\Bundle\FrameworkBundle\Templating\Helper\FormHelper')
             ->disableOriginalConstructor()
             ->getMock();
 
-        $this->formHelperMock
-            ->expects($this->any())
-            ->method('getName')
-            ->will($this->returnValue('form'));
-
-        $this->phpEngine->addHelpers(array($this->formHelperMock));
+        $this->phpEngine = new PhpEngine(
+            new TemplateNameParser(),
+            new FilesystemLoader(array(__DIR__.'/../../Resources/views/Form/%name%')),
+            array(
+                'form' => $this->formHelperMock,
+                $this->helper,
+            )
+        );
     }
 
     /**
@@ -55,7 +54,9 @@ class PhpTemplateTest extends AbstractTemplateTest
      */
     protected function tearDown()
     {
-        unset($this->formHelper);
+        parent::tearDown();
+
+        unset($this->formHelperMock);
         unset($this->phpEngine);
     }
 

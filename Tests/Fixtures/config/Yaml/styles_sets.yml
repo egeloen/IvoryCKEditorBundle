@@ -1,0 +1,11 @@
+ivory_ck_editor:
+    styles:
+        default:
+            -
+                name: "Blue Title"
+                element: "h2"
+                styles: { text-decoration: "underline" }
+            -
+                name: "CSS Style"
+                element: "span"
+                attributes: { data-class: "my-style" }

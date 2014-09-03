@@ -1,23 +1,29 @@
 {% block ckeditor_widget %}
-    <textarea {{ block('widget_attributes') }}>{{ value | raw }}</textarea>
+    <textarea {{ block('widget_attributes') }}>{{ value }}</textarea>
 
     {% if enable %}
+        {% if autoload %}
+            <script type="text/javascript">
+                var CKEDITOR_BASEPATH = "{{ ckeditor_base_path(base_path) }}";
+            </script>
+            <script type="text/javascript" src="{{ ckeditor_js_path(js_path) }}"></script>
+        {% endif %}
         <script type="text/javascript">
-            var CKEDITOR_BASEPATH = '{{ base_path }}';
-        </script>
-
-        <script type="text/javascript" src="{{ js_path }}"></script>
-
-        <script type="text/javascript">
-            if (CKEDITOR.instances['{{ id }}']) {
-                delete CKEDITOR.instances['{{ id }}'];
-            }
+            {{ ckeditor_destroy(id) }}
 
             {% for plugin_name, plugin in plugins %}
-                CKEDITOR.plugins.addExternal('{{ plugin_name }}', '{{ plugin.path }}', '{{ plugin.filename }}');
+                {{ ckeditor_plugin(plugin_name, plugin) }}
             {% endfor %}
 
-            CKEDITOR.replace('{{ id }}', {{ config | raw }});
+            {% for style_name, style in styles %}
+                {{ ckeditor_styles_set(style_name, style) }}
+            {% endfor %}
+
+            {% for template_name, template in templates %}
+                {{ ckeditor_template(template_name, template) }}
+            {% endfor %}
+
+            {{ ckeditor_replace(id, config) }}
         </script>
     {% endif %}
 {% endblock %}

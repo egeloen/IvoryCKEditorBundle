@@ -84,6 +84,106 @@ $builder->add('field', 'ckeditor', array(
 ));
 ```
 
+## StylesSet support
+
+The bundle allows you to define your own styles. Like plugins, you can define them at the form level or in your
+configuration file:
+
+``` php
+$builder->add('field', 'ckeditor', array(
+    'config' => array(
+        'stylesSet' => 'my_styles',
+    ),
+    'styles' => array(
+        'my_styles' => array(
+            array('name' => 'Blue Title', 'element' => 'h2', 'styles' => array('color' => 'Blue')),
+            array('name' => 'CSS Style', 'element' => 'span', 'attributes' => array('class' => 'my_style')),
+        ),
+    ),
+));
+```
+
+``` yaml
+# app/config/config.yml
+ivory_ck_editor:
+    default_config: my_config
+    configs:
+        my_config:
+            stylesSet: "my_styles"
+    styles:
+        my_styles:
+            - { name: "Blue Title", element: "h2", styles: { color: "Blue" }}
+            - { name: "CSS Style", element: "span", attributes: { class: "my_style" }}
+```
+
+## Templates support
+
+The bundle offers you the ability to manage extra templates. To use this feature, you need to enable the `templates`
+plugins shipped with the bundle and configure your templates. Like plugins, you can define them at the form level or in
+your configuration file:
+
+``` php
+$builder->add('field', 'ckeditor', array(
+    'config' => array(
+        'extraPlugins' => 'templates',
+        'templates'    => 'my_template',
+    ),
+    'templates' => array(
+        'my_template' => array(
+            'imagesPath' => '/bundles/mybundle/templates/images',
+            'templates'  => array(
+                array(
+                    'title'       => 'My Template',
+                    'image'       => 'images.jpg',
+                    'description' => 'My awesome template',
+                    'html'        => '<p>Crazy template :)</p>',
+                ),
+                // ...
+            ),
+        ),
+    ),
+));
+```
+
+``` yaml
+# app/config/config.yml
+ivory_ck_editor:
+    default_config: my_config
+    configs:
+        my_config:
+            extraPlugins: "templates"
+            templates:    "my_templates"
+    templates:
+        my_templates:
+            imagesPath: "/bundles/mybundle/templates/images"
+            templates:
+                -
+                    title:       "My Template"
+                    image:       "image.jpg"
+                    description: "My awesome template"
+                    html:        "<p>Crazy template :)</p>"
+```
+
+## Load manually the library
+
+By default, all fields loads the CKEditor library. It means if you have multiple CKEditor fields, there will be
+multiple CKEditor library loading (as much as you have fields). If you want to control it, you can configure the
+bundle to not load the library at all and let you the control of it. To disable the CKEditor libary loading, you can
+do it globally:
+
+``` yaml
+ivory_ck_editor:
+    autoload: false
+```
+
+Or, if you just want to disable it for a specific field, you can use:
+
+``` php
+$builder->add('field', 'ckeditor', array('autoload' => false));
+```
+
+Be aware, the library must be loaded before any field have been rendered.
+
 ## Fallback to textarea for testing purpose
 
 Sometime you don't want to use the CKEditor widget but a simple textarea (e.g testing purpose). As CKEditor uses an

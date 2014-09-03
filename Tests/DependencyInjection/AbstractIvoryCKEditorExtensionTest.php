@@ -12,8 +12,8 @@
 namespace Ivory\CKEditorBundle\Tests\DependencyInjection;
 
 use Ivory\CKEditorBundle\DependencyInjection\IvoryCKEditorExtension;
+use Ivory\CKEditorBundle\Tests\Fixtures\Extension\FrameworkExtension;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\DependencyInjection\Scope;
 
 /**
  * Abstract Ivory CKEditor extension test.
@@ -25,10 +25,10 @@ abstract class AbstractIvoryCKEditorExtensionTest extends \PHPUnit_Framework_Tes
     /** @var \Symfony\Component\DependencyInjection\ContainerBuilder */
     protected $container;
 
-    /** @var \Symfony\Component\Templating\Helper\CoreAssetsHelper */
+    /** @var \Symfony\Component\Templating\Helper\CoreAssetsHelper|\PHPUnit_Framework_MockObject_MockObject */
     protected $assetsHelperMock;
 
-    /** @var \Symfony\Component\Routing\RouterInterface */
+    /** @var \Symfony\Component\Routing\RouterInterface|\PHPUnit_Framework_MockObject_MockObject */
     protected $routerMock;
 
     /**
@@ -44,15 +44,14 @@ abstract class AbstractIvoryCKEditorExtensionTest extends \PHPUnit_Framework_Tes
 
         $this->container = new ContainerBuilder();
 
-        $this->container->addScope(new Scope('request'));
-
         $this->container->set('templating.helper.assets', $this->assetsHelperMock);
         $this->container->set('router', $this->routerMock);
 
-        $this->container->setParameter('templating.engines', array('php', 'twig'));
+        $this->container->registerExtension($framework = new FrameworkExtension());
+        $this->container->loadFromExtension($framework->getAlias());
 
-        $this->container->registerExtension($extension = new IvoryCKEditorExtension());
-        $this->container->loadFromExtension($extension->getAlias());
+        $this->container->registerExtension($ckeditor = new IvoryCKEditorExtension());
+        $this->container->loadFromExtension($ckeditor->getAlias());
     }
 
     /**
@@ -73,28 +72,21 @@ abstract class AbstractIvoryCKEditorExtensionTest extends \PHPUnit_Framework_Tes
      */
     abstract protected function loadConfiguration(ContainerBuilder $container, $configuration);
 
-    public function testFormType()
+    public function testDefaultFormType()
     {
         $this->container->compile();
 
-        $this->container->enterScope('request');
+        $type = $this->container->get('ivory_ck_editor.form.type');
 
-        $this->assertInstanceOf(
-            'Ivory\CKEditorBundle\Form\Type\CKEditorType',
-            $this->container->get('ivory_ck_editor.form.type')
-        );
-
-        $this->container->leaveScope('request');
-    }
-
-    public function testAssetsVersionTrimer()
-    {
-        $this->container->compile();
-
-        $this->assertInstanceOf(
-            'Ivory\CKEditorBundle\Helper\AssetsVersionTrimerHelper',
-            $this->container->get('ivory_ck_editor.helper.assets_version_trimer')
-        );
+        $this->assertInstanceOf('Ivory\CKEditorBundle\Form\Type\CKEditorType', $type);
+        $this->assertTrue($type->isEnable());
+        $this->assertTrue($type->isAutoload());
+        $this->assertSame('bundles/ivoryckeditor/', $type->getBasePath());
+        $this->assertSame('bundles/ivoryckeditor/ckeditor.js', $type->getJsPath());
+        $this->assertSame($this->container->get('ivory_ck_editor.config_manager'), $type->getConfigManager());
+        $this->assertSame($this->container->get('ivory_ck_editor.plugin_manager'), $type->getPluginManager());
+        $this->assertSame($this->container->get('ivory_ck_editor.styles_set_manager'), $type->getStylesSetManager());
+        $this->assertSame($this->container->get('ivory_ck_editor.template_manager'), $type->getTemplateManager());
     }
 
     public function testTwigResources()
@@ -123,19 +115,21 @@ abstract class AbstractIvoryCKEditorExtensionTest extends \PHPUnit_Framework_Tes
         $this->loadConfiguration($this->container, 'disable');
         $this->container->compile();
 
-        $this->container->enterScope('request');
-
         $this->assertFalse($this->container->get('ivory_ck_editor.form.type')->isEnable());
+    }
 
-        $this->container->leaveScope('request');
+    public function testAutoload()
+    {
+        $this->loadConfiguration($this->container, 'autoload');
+        $this->container->compile();
+
+        $this->assertFalse($this->container->get('ivory_ck_editor.form.type')->isAutoload());
     }
 
     public function testSingleConfiguration()
     {
         $this->loadConfiguration($this->container, 'single_configuration');
         $this->container->compile();
-
-        $this->container->enterScope('request');
 
         $configManager = $this->container->get('ivory_ck_editor.config_manager');
 
@@ -154,16 +148,12 @@ abstract class AbstractIvoryCKEditorExtensionTest extends \PHPUnit_Framework_Tes
 
         $this->assertSame('default', $configManager->getDefaultConfig());
         $this->assertSame($expected, $configManager->getConfigs());
-
-        $this->container->leaveScope('request');
     }
 
     public function testMultipleConfiguration()
     {
         $this->loadConfiguration($this->container, 'multiple_configuration');
         $this->container->compile();
-
-        $this->container->enterScope('request');
 
         $configManager = $this->container->get('ivory_ck_editor.config_manager');
 
@@ -190,8 +180,6 @@ abstract class AbstractIvoryCKEditorExtensionTest extends \PHPUnit_Framework_Tes
 
         $this->assertSame('default', $configManager->getDefaultConfig());
         $this->assertSame($expected, $configManager->getConfigs());
-
-        $this->container->leaveScope('request');
     }
 
     public function testBasicToolbar()
@@ -199,14 +187,10 @@ abstract class AbstractIvoryCKEditorExtensionTest extends \PHPUnit_Framework_Tes
         $this->loadConfiguration($this->container, 'basic_toolbar');
         $this->container->compile();
 
-        $this->container->enterScope('request');
-
         $configManager = $this->container->get('ivory_ck_editor.config_manager');
         $config = $configManager->getConfig('default');
 
         $this->assertCount(4, $config['toolbar']);
-
-        $this->container->leaveScope('request');
     }
 
     public function testStandardToolbar()
@@ -214,14 +198,10 @@ abstract class AbstractIvoryCKEditorExtensionTest extends \PHPUnit_Framework_Tes
         $this->loadConfiguration($this->container, 'standard_toolbar');
         $this->container->compile();
 
-        $this->container->enterScope('request');
-
         $configManager = $this->container->get('ivory_ck_editor.config_manager');
         $config = $configManager->getConfig('default');
 
         $this->assertCount(10, $config['toolbar']);
-
-        $this->container->leaveScope('request');
     }
 
     public function testFullToolbar()
@@ -229,14 +209,10 @@ abstract class AbstractIvoryCKEditorExtensionTest extends \PHPUnit_Framework_Tes
         $this->loadConfiguration($this->container, 'full_toolbar');
         $this->container->compile();
 
-        $this->container->enterScope('request');
-
         $configManager = $this->container->get('ivory_ck_editor.config_manager');
         $config = $configManager->getConfig('default');
 
         $this->assertCount(13, $config['toolbar']);
-
-        $this->container->leaveScope('request');
     }
 
     public function testPlugins()
@@ -244,24 +220,49 @@ abstract class AbstractIvoryCKEditorExtensionTest extends \PHPUnit_Framework_Tes
         $this->loadConfiguration($this->container, 'plugins');
         $this->container->compile();
 
-        $this->container->enterScope('request');
-
-        $this->assetsHelperMock
-            ->expects($this->once())
-            ->method('getUrl')
-            ->with($this->equalTo('/my/path'), $this->equalTo(null))
-            ->will($this->returnValue('/my/rewritten/path'));
-
-        $pluginManager = $this->container->get('ivory_ck_editor.plugin_manager');
-
         $expected = array('wordcount' => array(
-            'path'     => '/my/rewritten/path',
+            'path'     => '/my/path',
             'filename' => 'plugin.js',
         ));
 
-        $this->assertSame($expected, $pluginManager->getPlugins());
+        $this->assertSame($expected, $this->container->get('ivory_ck_editor.plugin_manager')->getPlugins());
+    }
 
-        $this->container->leaveScope('request');
+    public function testStylesSets()
+    {
+        $this->loadConfiguration($this->container, 'styles_sets');
+        $this->container->compile();
+
+        $expected = array(
+            'default' => array(
+                array('name' => 'Blue Title', 'element' => 'h2', 'styles' => array('text-decoration' => 'underline')),
+                array('name' => 'CSS Style', 'element' => 'span', 'attributes' => array('data-class' => 'my-style')),
+            )
+        );
+
+        $this->assertSame($expected, $this->container->get('ivory_ck_editor.styles_set_manager')->getStylesSets());
+    }
+
+    public function testTemplates()
+    {
+        $this->loadConfiguration($this->container, 'templates');
+        $this->container->compile();
+
+        $expected = array(
+            'default' => array(
+                'imagesPath' => '/my/path',
+                'templates'  => array(
+                    array(
+                        'title'       => 'My Template',
+                        'image'       => 'image.jpg',
+                        'description' => 'My awesome description',
+                        'html'        => '<h1>Template</h1><p>Type your text here.</p>',
+                    ),
+                ),
+            ),
+        );
+
+        $this->assertSame($expected, $this->container->get('ivory_ck_editor.template_manager')->getTemplates());
     }
 
     public function testCustomPaths()
@@ -269,14 +270,10 @@ abstract class AbstractIvoryCKEditorExtensionTest extends \PHPUnit_Framework_Tes
         $this->loadConfiguration($this->container, 'custom_paths');
         $this->container->compile();
 
-        $this->container->enterScope('request');
-
         $ckEditorType = $this->container->get('ivory_ck_editor.form.type');
 
         $this->assertSame('foo', $ckEditorType->getBasePath());
         $this->assertSame('foo/ckeditor.js', $ckEditorType->getJsPath());
-
-        $this->container->leaveScope('request');
     }
 
     /**
