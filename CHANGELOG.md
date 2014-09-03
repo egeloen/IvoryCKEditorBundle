@@ -1,7 +1,15 @@
 # CHANGELOG
 
-### 2.5.0 (????-??-??)
+### 2.5.1 (????-??-??)
 
+ * 6be9ee8 - [Build] Move CKEditor sync script from Resources/build/sync.sh to bin/ckeditor-sync
+
+### 2.5.0 (2014-08-29)
+
+ * 24e81ff - [Gitignore] Remove Composer installer and phar
+ * 47cdde6 - [README] Rely on relative link
+ * ce5813f - Add contributing doc
+ * 35baf4c - [Composer] Refine deps
  * ba8b84a - Upgrade CKEditor to 4.4.4
  * b9f21fa - [Config] Fix stylesSet YAML keys normalization
  * e47d803 - [Travis] Improve build matrix
