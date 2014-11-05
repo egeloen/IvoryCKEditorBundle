@@ -78,6 +78,8 @@ class CKEditorHelper extends Helper
             ->setValues($this->fixConfigFilebrowsers($this->fixConfigContentsCss($config)));
 
         $this->fixConfigEscapedValues($config);
+        
+        $this->fixConfigLanguage($config);
 
         return sprintf('CKEDITOR.replace("%s", %s);', $id, $this->fixConfigConstants($this->jsonBuilder->build()));
     }
@@ -184,6 +186,21 @@ class CKEditorHelper extends Helper
         }
 
         return $config;
+    }
+    
+    /**
+     * Fixes the config language.
+     *
+     * @param array $config The config.
+     *
+     * @return array The fixed config.
+     */
+    protected function fixConfigLanguage(array $config)
+    {
+        if (isset($config['language'])) {
+            $config['language'] = strtolower(str_replace("_", "-", $config['language']));
+            $this->jsonBuilder->reset()->setValues($config);
+        }
     }
 
     /**
