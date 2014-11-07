@@ -78,14 +78,15 @@ class CKEditorExtension extends \Twig_Extension
     /**
      * Renders the replace.
      *
-     * @param string $id     The identifier.
-     * @param array  $config The config.
+     * @param string  $id       The identifier.
+     * @param array   $config   The config.
+     * @param boolean $embedded Is the editor embedded?
      *
      * @return string The rendered replace.
      */
-    public function renderReplace($id, array $config)
+    public function renderReplace($id, array $config, $embedded = false)
     {
-        return $this->helper->renderReplace($id, $config);
+        return $this->helper->renderReplace($id, $config, $embedded);
     }
 
     /**

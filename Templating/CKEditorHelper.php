@@ -66,12 +66,13 @@ class CKEditorHelper extends Helper
     /**
      * Renders the replace.
      *
-     * @param string $id     The identifier.
-     * @param array  $config The config.
+     * @param string  $id       The identifier.
+     * @param array   $config   The config.
+     * @param boolean $embedded Is the editor embedded?
      *
      * @return string The rendered replace.
      */
-    public function renderReplace($id, array $config)
+    public function renderReplace($id, array $config, $embedded = false)
     {
         $config = $this->fixConfigLanguage($config);
         $config = $this->fixConfigContentsCss($config);
@@ -83,7 +84,18 @@ class CKEditorHelper extends Helper
 
         $this->fixConfigEscapedValues($config);
 
-        return sprintf('CKEDITOR.replace("%s", %s);', $id, $this->fixConfigConstants($this->jsonBuilder->build()));
+        $js = sprintf(
+            'CKEDITOR.replace("%s", %s);',
+            $id,
+            $this->fixConfigConstants($this->jsonBuilder->build())
+        );
+
+        if ($embedded) {
+            $name = 'editor_' . $id;
+            $js = "var $name = $js $name.on('change', function() { $name.updateElement() });";
+        }
+
+        return $js;
     }
 
     /**
