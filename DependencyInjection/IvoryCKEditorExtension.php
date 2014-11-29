@@ -288,6 +288,10 @@ class IvoryCKEditorExtension extends ConfigurableExtension
     {
         foreach ($stylesSet as &$value) {
             $value = array_filter($value);
+
+            if(isset($value['element']) and count($value['element']) === 1){
+                $value['element'] = current($value['element']);
+            }
         }
 
         return $stylesSet;
