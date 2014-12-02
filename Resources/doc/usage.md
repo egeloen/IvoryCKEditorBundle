@@ -98,7 +98,8 @@ Place the following code on your config.yml and change the skin name
 ivory_ck_editor:
     configs:
         my_config:
-            skin: "skin_name,/absolute/web/skin/path/" # ex: ckeditor/skins/skin_name/ if you place in web directory
+            skin: "skin_name,/absolute/web/skin/path/" 
+                            # ex: ckeditor/skins/skin_name/ if you placed in the web directory
 ```
 
 ## StylesSet support
