@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @license Copyright (c) 2003-2014, CKSource - Frederico Knabben. All rights reserved.
  * For licensing, see LICENSE.md or http://ckeditor.com/license
  */
@@ -29,15 +29,20 @@ var CKBUILDER_CONFIG = {
 	preset: 'full',
 	ignore: [
 		'.bender',
-		'.DS_Store',
-		'.gitignore',
-		'.gitattributes',
-		'.idea',
-		'.mailmap',
 		'bender.js',
 		'bender-err.log',
 		'bender-out.log',
 		'dev',
+		'.DS_Store',
+		'.gitattributes',
+		'.gitignore',
+		'Gruntfile.js',
+		'gruntfile.js',
+		'.idea',
+		'.jscsrc',
+		'.jshintignore',
+		'.jshintrc',
+		'.mailmap',
 		'node_modules',
 		'package.json',
 		'README.md',
