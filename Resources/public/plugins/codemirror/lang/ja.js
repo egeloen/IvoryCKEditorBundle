@@ -4,7 +4,9 @@ For licensing, see LICENSE.html or http://ckeditor.com/license
 */
 CKEDITOR.plugins.setLang( 'codemirror', 'ja', {
 	toolbar: 'ソース',
+	searchCode: 'Search Source',
 	autoFormat: 'Format Selection',
 	commentSelectedRange: 'Comment Selection',
-	uncommentSelectedRange: 'Uncomment Selection'
+	uncommentSelectedRange: 'Uncomment Selection',
+	autoCompleteToggle: 'Enable/Disable HTML Tag Autocomplete'
 });
