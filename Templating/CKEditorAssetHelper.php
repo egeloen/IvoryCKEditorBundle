@@ -47,7 +47,7 @@ class CKEditorAssetHelper
     }
 
     /**
-     * @return \Symfony\Component\Templating\Asset\Package|Symfony\Component\Templating\Helper\AssetsHelper
+     * @return \Symfony\Component\Asset\Packages|\Symfony\Component\Templating\Helper\AssetsHelper
      *
      * @throws \Ivory\CKEditorBundle\Exception\AssetHelperException
      */

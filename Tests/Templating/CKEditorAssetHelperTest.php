@@ -27,11 +27,13 @@ class CKEditorAssetHelperTest extends \PHPUnit_Framework_TestCase
     /** @var \Symfony\Component\DependencyInjection\ContainerInterface|\PHPUnit_Framework_MockObject_MockObject */
     private $containerMock;
 
-    /** @var \Symfony\Component\Templating\Asset\Package|\PHPUnit_Framework_MockObject_MockObject */
+    /** @var \Symfony\Component\Asset\Packages|\PHPUnit_Framework_MockObject_MockObject */
     private $assetsPackagesMock;
 
     /**
      * {@inheritdoc}
+     *
+     * @todo replace \Symfony\Component\Templating\Asset\PackageInterface with \Symfony\Component\Asset\Packages
      */
     protected function setUp()
     {
@@ -39,7 +41,7 @@ class CKEditorAssetHelperTest extends \PHPUnit_Framework_TestCase
             ->disableOriginalConstructor()
             ->getMock();
 
-        $this->assetsPackagesMock = $this->getMockBuilder('Symfony\Component\Templating\Asset\Package')
+        $this->assetsPackagesMock = $this->getMockBuilder('Symfony\Component\Templating\Asset\PackageInterface')
             ->disableOriginalConstructor()
             ->getMock();
 
