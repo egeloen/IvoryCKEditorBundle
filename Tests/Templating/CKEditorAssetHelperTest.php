@@ -32,8 +32,6 @@ class CKEditorAssetHelperTest extends \PHPUnit_Framework_TestCase
 
     /**
      * {@inheritdoc}
-     *
-     * @todo replace \Symfony\Component\Templating\Asset\PackageInterface with \Symfony\Component\Asset\Packages
      */
     protected function setUp()
     {
@@ -41,7 +39,18 @@ class CKEditorAssetHelperTest extends \PHPUnit_Framework_TestCase
             ->disableOriginalConstructor()
             ->getMock();
 
-        $this->assetsPackagesMock = $this->getMockBuilder('Symfony\Component\Templating\Asset\PackageInterface')
+        $assetsPackagesMockClasses = array(
+            'Symfony\Component\Asset\Packages',
+            'Symfony\Component\Templating\Asset\PackageInterface',
+        );
+
+        foreach ($assetsPackagesMockClasses as $assetsPackagesMockClass) {
+            if (class_exists($assetsPackagesMockClass)) {
+                break;
+            }
+        }
+
+        $this->assetsPackagesMock = $this->getMockBuilder($assetsPackagesMockClass)
             ->disableOriginalConstructor()
             ->getMock();
 
