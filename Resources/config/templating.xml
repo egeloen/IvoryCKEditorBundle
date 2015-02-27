@@ -5,6 +5,9 @@
     xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd"
 >
     <services>
+        <service id="ivory_ck_editor.templating.asset_helper" class="Ivory\CKEditorBundle\Templating\CKEditorAssetHelper">
+            <argument type="service" id="service_container" />
+        </service>
         <service id="ivory_ck_editor.templating.helper" class="Ivory\CKEditorBundle\Templating\CKEditorHelper">
             <argument type="service" id="service_container" />
             <tag name="templating.helper" alias="ivory_ckeditor" />

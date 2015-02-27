@@ -19,13 +19,14 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
  * Abstract Ivory CKEditor extension test.
  *
  * @author GeLo <geloen.eric@gmail.com>
+ * @author Adam Misiorny <adam.misiorny@gmail.com>
  */
 abstract class AbstractIvoryCKEditorExtensionTest extends \PHPUnit_Framework_TestCase
 {
     /** @var \Symfony\Component\DependencyInjection\ContainerBuilder */
     private $container;
 
-    /** @var \Symfony\Component\Templating\Helper\CoreAssetsHelper|\PHPUnit_Framework_MockObject_MockObject */
+    /** @var \Ivory\CKEditorBundle\Templating\CKEditorAssetHelper|\PHPUnit_Framework_MockObject_MockObject */
     private $assetsHelperMock;
 
     /** @var \Symfony\Component\Routing\RouterInterface|\PHPUnit_Framework_MockObject_MockObject */
@@ -36,7 +37,7 @@ abstract class AbstractIvoryCKEditorExtensionTest extends \PHPUnit_Framework_Tes
      */
     protected function setUp()
     {
-        $this->assetsHelperMock = $this->getMockBuilder('Symfony\Component\Templating\Helper\CoreAssetsHelper')
+        $this->assetsHelperMock = $this->getMockBuilder('Ivory\CKEditorBundle\Templating\CKEditorAssetHelper')
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -44,7 +45,7 @@ abstract class AbstractIvoryCKEditorExtensionTest extends \PHPUnit_Framework_Tes
 
         $this->container = new ContainerBuilder();
 
-        $this->container->set('templating.helper.assets', $this->assetsHelperMock);
+        $this->container->set('ivory_ck_editor.templating.asset_helper', $this->assetsHelperMock);
         $this->container->set('router', $this->routerMock);
 
         $this->container->registerExtension($framework = new FrameworkExtension());

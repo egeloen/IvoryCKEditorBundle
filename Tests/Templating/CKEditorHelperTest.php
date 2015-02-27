@@ -19,6 +19,7 @@ use Symfony\Component\Routing\RouterInterface;
  * CKEditor helper test.
  *
  * @author GeLo <geloen.eric@gmail.com>
+ * @author Adam Misiorny <adam.misiorny@gmail.com>
  */
 class CKEditorHelperTest extends \PHPUnit_Framework_TestCase
 {
@@ -28,7 +29,7 @@ class CKEditorHelperTest extends \PHPUnit_Framework_TestCase
     /** @var \Symfony\Component\DependencyInjection\ContainerInterface|\PHPUnit_Framework_MockObject_MockObject */
     private $containerMock;
 
-    /** @var \Symfony\Component\Templating\Helper\CoreAssetsHelper|\PHPUnit_Framework_MockObject_MockObject */
+    /** @var \IvoryCKEditorBundle\Templating\CKEditorAssetHelper|\PHPUnit_Framework_MockObject_MockObject */
     private $assetsHelperMock;
 
     /** @var \Symfony\Component\Routing\RouterInterface|\PHPUnit_Framework_MockObject_MockObject */
@@ -39,7 +40,7 @@ class CKEditorHelperTest extends \PHPUnit_Framework_TestCase
      */
     protected function setUp()
     {
-        $this->assetsHelperMock = $this->getMockBuilder('Symfony\Component\Templating\Helper\CoreAssetsHelper')
+        $this->assetsHelperMock = $this->getMockBuilder('Ivory\CKEditorBundle\Templating\CKEditorAssetHelper')
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -51,7 +52,7 @@ class CKEditorHelperTest extends \PHPUnit_Framework_TestCase
             ->method('get')
             ->will($this->returnValueMap(array(
                 array(
-                    'templating.helper.assets',
+                    'ivory_ck_editor.templating.asset_helper',
                     ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE,
                     $this->assetsHelperMock,
                 ),

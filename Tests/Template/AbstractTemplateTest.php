@@ -18,6 +18,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * Abstract template test.
  *
  * @author GeLo <geloen.eric@gmail.com>
+ * @author Adam Misiorny <adam.misiorny@gmail.com>
  */
 abstract class AbstractTemplateTest extends \PHPUnit_Framework_TestCase
 {
@@ -27,7 +28,7 @@ abstract class AbstractTemplateTest extends \PHPUnit_Framework_TestCase
     /** @var \Symfony\Component\DependencyInjection\ContainerInterface|\PHPUnit_Framework_MockObject_MockObject */
     private $containerMock;
 
-    /** @var \Symfony\Component\Templating\Helper\CoreAssetsHelper|\PHPUnit_Framework_MockObject_MockObject */
+    /** @var \Ivory\CKEditorBundle\Templating\CKEditorAssetHelper|\PHPUnit_Framework_MockObject_MockObject */
     private $assetsHelperMock;
 
     /** @var \Symfony\Component\Routing\RouterInterface|\PHPUnit_Framework_MockObject_MockObject */
@@ -40,7 +41,7 @@ abstract class AbstractTemplateTest extends \PHPUnit_Framework_TestCase
     {
         $this->routerMock = $this->getMock('Symfony\Component\Routing\RouterInterface');
 
-        $this->assetsHelperMock = $this->getMockBuilder('Symfony\Component\Templating\Helper\CoreAssetsHelper')
+        $this->assetsHelperMock = $this->getMockBuilder('Ivory\CKEditorBundle\Templating\CKEditorAssetHelper')
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -55,7 +56,7 @@ abstract class AbstractTemplateTest extends \PHPUnit_Framework_TestCase
             ->method('get')
             ->will($this->returnValueMap(array(
                 array(
-                    'templating.helper.assets',
+                    'ivory_ck_editor.templating.asset_helper',
                     ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE,
                     $this->assetsHelperMock,
                 ),
