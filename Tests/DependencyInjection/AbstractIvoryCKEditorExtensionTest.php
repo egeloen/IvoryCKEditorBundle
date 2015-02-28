@@ -332,6 +332,28 @@ abstract class AbstractIvoryCKEditorExtensionTest extends \PHPUnit_Framework_Tes
         $this->assertSame('foo/ckeditor.js', $ckEditorType->getJsPath());
     }
 
+    public function testTemplatingConfiguration()
+    {
+        // remove mock definition from container builder before compiling
+        $this->container->removeDefinition('ivory_ck_editor.templating.asset_helper');
+        $this->container->compile();
+
+        $services = array(
+            'ivory_ck_editor.templating.asset_helper',
+            'ivory_ck_editor.templating.helper',
+        );
+
+        foreach ($services as $service) {
+            $has = $this->container->hasDefinition($service);
+            $this->assertTrue($has, sprintf('Missing service definition for "%s"', $service));
+            if ($has) {
+                $def = $this->container->getDefinition($service);
+                $ref = $def->getArgument(0);
+                $this->assertSame('service_container', (string) $ref);
+            }
+        }
+    }
+
     /**
      * @expectedException \Ivory\CKEditorBundle\Exception\DependencyInjectionException
      * @expectedExceptionMessage The default config "bar" does not exist.
