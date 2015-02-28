@@ -13,6 +13,7 @@ namespace Ivory\CKEditorBundle\Tests\Templating;
 
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Ivory\CKEditorBundle\Templating\CKEditorAssetHelper;
+use Symfony\Component\HttpKernel\Kernel;
 
 /**
  * CKEditor asset helper test.
@@ -123,6 +124,10 @@ class CKEditorAssetHelperTest extends \PHPUnit_Framework_TestCase
      */
     public function testGettingUrlFromAssetsHelper($path, $asset, $url)
     {
+        if (version_compare(Kernel::VERSION, '2.7.0', '>=')) {
+            $this->markTestSkipped('Skip test on symfony 2.7 since CoreAssetsHelper is deprecated');
+        }
+
         $this->containerMock
             ->expects($this->at(0))
             ->method('has')
