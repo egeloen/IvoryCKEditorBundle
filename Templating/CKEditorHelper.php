@@ -12,8 +12,9 @@
 namespace Ivory\CKEditorBundle\Templating;
 
 use Ivory\JsonBuilder\JsonBuilder;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Templating\Helper\Helper;
+use Symfony\Component\Templating\Helper\HelperInterface;
+use Symfony\Component\Routing\RouterInterface;
 
 /**
  * CKEditor helper.
@@ -25,18 +26,23 @@ class CKEditorHelper extends Helper
     /** @var \Ivory\JsonBuilder\JsonBuilder */
     private $jsonBuilder;
 
-    /** @var \Symfony\Component\DependencyInjection\ContainerInterface */
-    private $container;
+    /** @var \Symfony\Component\Routing\RouterInterface */
+    private $router;
+
+    /** @var \Symfony\Component\Templating\Helper\HelperInterface */
+    private $assetHelper;
 
     /**
      * Creates a CKEditor template helper.
      *
-     * @param \Symfony\Component\DependencyInjection\ContainerInterface $container The container.
+     * @param Symfony\Component\Routing\RouterInterface The router.
+     * @param Symfony\Component\Templating\Helper\HelperInterface The asset helper
      */
-    public function __construct(ContainerInterface $container)
+    public function __construct(RouterInterface $router, HelperInterface $helper)
     {
         $this->jsonBuilder = new JsonBuilder();
-        $this->container = $container;
+        $this->router      = $router;
+        $this->assetHelper = $helper;
     }
 
     /**
@@ -327,7 +333,7 @@ class CKEditorHelper extends Helper
      */
     private function getAssetsHelper()
     {
-        return $this->container->get('templating.helper.assets');
+        return $this->assetHelper;
     }
 
     /**
@@ -337,6 +343,6 @@ class CKEditorHelper extends Helper
      */
     private function getRouter()
     {
-        return $this->container->get('router');
+        return $this->router;
     }
 }

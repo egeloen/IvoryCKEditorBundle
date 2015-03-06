@@ -25,9 +25,6 @@ class CKEditorHelperTest extends \PHPUnit_Framework_TestCase
     /** @var \Ivory\CKEditorBundle\Templating\CKEditorHelper */
     private $helper;
 
-    /** @var \Symfony\Component\DependencyInjection\ContainerInterface|\PHPUnit_Framework_MockObject_MockObject */
-    private $containerMock;
-
     /** @var \Symfony\Component\Templating\Helper\CoreAssetsHelper|\PHPUnit_Framework_MockObject_MockObject */
     private $assetsHelperMock;
 
@@ -45,24 +42,7 @@ class CKEditorHelperTest extends \PHPUnit_Framework_TestCase
 
         $this->routerMock = $this->getMock('Symfony\Component\Routing\RouterInterface');
 
-        $this->containerMock = $this->getMock('Symfony\Component\DependencyInjection\ContainerInterface');
-        $this->containerMock
-            ->expects($this->any())
-            ->method('get')
-            ->will($this->returnValueMap(array(
-                array(
-                    'templating.helper.assets',
-                    ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE,
-                    $this->assetsHelperMock,
-                ),
-                array(
-                    'router',
-                    ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE,
-                    $this->routerMock,
-                ),
-            )));
-
-        $this->helper = new CKEditorHelper($this->containerMock);
+        $this->helper = new CKEditorHelper($this->routerMock, $this->assetsHelperMock);
     }
 
     /**
@@ -71,7 +51,6 @@ class CKEditorHelperTest extends \PHPUnit_Framework_TestCase
     protected function tearDown()
     {
         unset($this->helper);
-        unset($this->containerMock);
         unset($this->routerMock);
         unset($this->assetsHelperMock);
     }
