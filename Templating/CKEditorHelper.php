@@ -12,31 +12,37 @@
 namespace Ivory\CKEditorBundle\Templating;
 
 use Ivory\JsonBuilder\JsonBuilder;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Templating\Helper\Helper;
+use Symfony\Component\Routing\RouterInterface;
 
 /**
  * CKEditor helper.
  *
  * @author GeLo <geloen.eric@gmail.com>
+ * @author Adam Misiorny <adam.misiorny@gmail.com>
  */
 class CKEditorHelper extends Helper
 {
     /** @var \Ivory\JsonBuilder\JsonBuilder */
     private $jsonBuilder;
 
-    /** @var \Symfony\Component\DependencyInjection\ContainerInterface */
-    private $container;
+    /** @var \Symfony\Component\Routing\RouterInterface */
+    private $router;
+
+    /** @var \Ivory\CKEditorBundle\Templating\CKEditorAssetHelper */
+    private $assetHelper;
 
     /**
      * Creates a CKEditor template helper.
      *
-     * @param \Symfony\Component\DependencyInjection\ContainerInterface $container The container.
+     * @param Symfony\Component\Routing\RouterInterface The router.
+     * @param Ivory\CKEditorBundle\Templating\CKEditorAssetHelper The asset helper
      */
-    public function __construct(ContainerInterface $container)
+    public function __construct(RouterInterface $router, CKEditorAssetHelper $helper)
     {
         $this->jsonBuilder = new JsonBuilder();
-        $this->container = $container;
+        $this->router      = $router;
+        $this->assetHelper = $helper;
     }
 
     /**
@@ -323,11 +329,11 @@ class CKEditorHelper extends Helper
     /**
      * Gets the assets helper.
      *
-     * @return \Symfony\Component\Templating\Helper\CoreAssetsHelper The assets helper.
+     * @return \Ivory\CKEditorBundle\Templating\CKEditorAssetHelper The assets helper.
      */
     private function getAssetsHelper()
     {
-        return $this->container->get('templating.helper.assets');
+        return $this->assetHelper;
     }
 
     /**
@@ -337,6 +343,6 @@ class CKEditorHelper extends Helper
      */
     private function getRouter()
     {
-        return $this->container->get('router');
+        return $this->router;
     }
 }

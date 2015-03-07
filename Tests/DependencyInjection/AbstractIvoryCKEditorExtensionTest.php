@@ -19,13 +19,14 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
  * Abstract Ivory CKEditor extension test.
  *
  * @author GeLo <geloen.eric@gmail.com>
+ * @author Adam Misiorny <adam.misiorny@gmail.com>
  */
 abstract class AbstractIvoryCKEditorExtensionTest extends \PHPUnit_Framework_TestCase
 {
     /** @var \Symfony\Component\DependencyInjection\ContainerBuilder */
     private $container;
 
-    /** @var \Symfony\Component\Templating\Helper\CoreAssetsHelper|\PHPUnit_Framework_MockObject_MockObject */
+    /** @var \Ivory\CKEditorBundle\Templating\CKEditorAssetHelper|\PHPUnit_Framework_MockObject_MockObject */
     private $assetsHelperMock;
 
     /** @var \Symfony\Component\Routing\RouterInterface|\PHPUnit_Framework_MockObject_MockObject */
@@ -36,7 +37,7 @@ abstract class AbstractIvoryCKEditorExtensionTest extends \PHPUnit_Framework_Tes
      */
     protected function setUp()
     {
-        $this->assetsHelperMock = $this->getMockBuilder('Symfony\Component\Templating\Helper\CoreAssetsHelper')
+        $this->assetsHelperMock = $this->getMockBuilder('Ivory\CKEditorBundle\Templating\CKEditorAssetHelper')
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -44,7 +45,7 @@ abstract class AbstractIvoryCKEditorExtensionTest extends \PHPUnit_Framework_Tes
 
         $this->container = new ContainerBuilder();
 
-        $this->container->set('templating.helper.assets', $this->assetsHelperMock);
+        $this->container->set('ivory_ck_editor.templating.asset_helper', $this->assetsHelperMock);
         $this->container->set('router', $this->routerMock);
 
         $this->container->registerExtension($framework = new FrameworkExtension());
@@ -329,6 +330,36 @@ abstract class AbstractIvoryCKEditorExtensionTest extends \PHPUnit_Framework_Tes
 
         $this->assertSame('foo', $ckEditorType->getBasePath());
         $this->assertSame('foo/ckeditor.js', $ckEditorType->getJsPath());
+    }
+
+    public function testTemplatingConfiguration()
+    {
+        // remove mock definition from container builder before compiling
+        $this->container->removeDefinition('ivory_ck_editor.templating.asset_helper');
+        $this->container->compile();
+
+        $service = 'ivory_ck_editor.templating.asset_helper';
+        $has     = $this->container->hasDefinition($service);
+        $this->assertTrue($has, sprintf('Missing service definition for "%s"', $service));
+        if ($has) {
+            $def = $this->container->getDefinition($service);
+            $ref = $def->getArgument(0);
+            $this->assertSame('service_container', (string) $ref);
+        }
+    }
+
+    public function testTemplatingHelperConfiguration()
+    {
+        $this->container->compile();
+
+        $has = $this->container->hasDefinition('ivory_ck_editor.templating.helper');
+        $this->assertTrue($has, sprintf('Missing service definition for "%s"', 'ivory_ck_editor.templating.helper'));
+        if ($has)
+        {
+            $def = $this->container->getDefinition('ivory_ck_editor.templating.helper');
+            $this->assertSame('router', (string) $def->getArgument(0));
+            $this->assertSame('ivory_ck_editor.templating.asset_helper', (string) $def->getArgument(1));
+        }
     }
 
     /**

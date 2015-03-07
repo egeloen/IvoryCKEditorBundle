@@ -18,16 +18,14 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * Abstract template test.
  *
  * @author GeLo <geloen.eric@gmail.com>
+ * @author Adam Misiorny <adam.misiorny@gmail.com>
  */
 abstract class AbstractTemplateTest extends \PHPUnit_Framework_TestCase
 {
     /** @var \Ivory\CKEditorBundle\Templating\CKEditorHelper */
     protected $helper;
 
-    /** @var \Symfony\Component\DependencyInjection\ContainerInterface|\PHPUnit_Framework_MockObject_MockObject */
-    private $containerMock;
-
-    /** @var \Symfony\Component\Templating\Helper\CoreAssetsHelper|\PHPUnit_Framework_MockObject_MockObject */
+    /** @var \Ivory\CKEditorBundle\Templating\CKEditorAssetHelper|\PHPUnit_Framework_MockObject_MockObject */
     private $assetsHelperMock;
 
     /** @var \Symfony\Component\Routing\RouterInterface|\PHPUnit_Framework_MockObject_MockObject */
@@ -40,7 +38,7 @@ abstract class AbstractTemplateTest extends \PHPUnit_Framework_TestCase
     {
         $this->routerMock = $this->getMock('Symfony\Component\Routing\RouterInterface');
 
-        $this->assetsHelperMock = $this->getMockBuilder('Symfony\Component\Templating\Helper\CoreAssetsHelper')
+        $this->assetsHelperMock = $this->getMockBuilder('Ivory\CKEditorBundle\Templating\CKEditorAssetHelper')
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -49,24 +47,7 @@ abstract class AbstractTemplateTest extends \PHPUnit_Framework_TestCase
             ->method('getUrl')
             ->will($this->returnArgument(0));
 
-        $this->containerMock = $this->getMock('Symfony\Component\DependencyInjection\ContainerInterface');
-        $this->containerMock
-            ->expects($this->any())
-            ->method('get')
-            ->will($this->returnValueMap(array(
-                array(
-                    'templating.helper.assets',
-                    ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE,
-                    $this->assetsHelperMock,
-                ),
-                array(
-                    'router',
-                    ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE,
-                    $this->routerMock,
-                ),
-            )));
-
-        $this->helper = new CKEditorHelper($this->containerMock);
+        $this->helper = new CKEditorHelper($this->routerMock, $this->assetsHelperMock);
     }
 
     /**
@@ -76,7 +57,6 @@ abstract class AbstractTemplateTest extends \PHPUnit_Framework_TestCase
     {
         unset($this->routerMock);
         unset($this->assetsHelperMock);
-        unset($this->containerMock);
         unset($this->helper);
     }
 
