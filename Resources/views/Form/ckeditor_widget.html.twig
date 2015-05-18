@@ -12,21 +12,27 @@
             {% endif %}
         {% endif %}
         <script type="text/javascript">
-            {{ ckeditor_destroy(id) }}
+            {% if jquery %}
+                $(function () {
+            {% endif %}
+                {{ ckeditor_destroy(id) }}
 
-            {% for plugin_name, plugin in plugins %}
+                {% for plugin_name, plugin in plugins %}
                 {{ ckeditor_plugin(plugin_name, plugin) }}
-            {% endfor %}
+                {% endfor %}
 
-            {% for style_name, style in styles %}
+                {% for style_name, style in styles %}
                 {{ ckeditor_styles_set(style_name, style) }}
-            {% endfor %}
+                {% endfor %}
 
-            {% for template_name, template in templates %}
+                {% for template_name, template in templates %}
                 {{ ckeditor_template(template_name, template) }}
-            {% endfor %}
+                {% endfor %}
 
-            {{ ckeditor_widget(id, config, inline, input_sync) }}
+                {{ ckeditor_widget(id, config, inline, input_sync) }}
+            {% if jquery %}
+                });
+            {% endif %}
         </script>
     {% endif %}
 {% endblock %}
