@@ -12,6 +12,8 @@
             {% endif %}
         {% endif %}
         <script type="text/javascript">
+            {% block ckeditor_config_start %}{% endblock %}
+        
             {{ ckeditor_destroy(id) }}
 
             {% for plugin_name, plugin in plugins %}
