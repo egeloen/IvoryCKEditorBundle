@@ -1,5 +1,38 @@
 # CHANGELOG
 
+### 3.0.2 (????-??-??)
+
+ * 0d8ede1 - [Doc] Update installation
+ * afea981 - Update CKEditor to 4.5.2
+ * f80cea0 - Updated CKEditor to 4.5.1
+ * 29f34a8 - Removed excessive use off long variable names.
+ * 7ee6d18 - [Template] Wrap widget code in $(document).ready() if jquery is enabled
+
+### 3.0.1 (2015-03-08)
+
+ * 982342e - Move resources merging in a compiler pass
+ * 838a249 - [Form][Type] Add BC layer for setDefaultOptions
+ * e651f63 - Use assets.packages instead of templating.helper.assets
+ * c0da2ac - Use new way of adding allowed types for symfony >= 2.6
+ * 9f3f97c - [Composer] Allow egeloen/json-builder 1.0.*
+ * 8f720d0 - Upgrade CKEditor to 4.4.7
+
+### 3.0.0 (2014-12-29)
+
+ * cbad747 - Add inline editing support
+ * c875b8b - [Travis] Add composer prefer-lowest build
+ * b23b5d1 - [Travis] Move Symfony 2.6.*@dev to 2.6.*
+ * c6c5dbe - Add stylesSet element array support
+ * c573a39 - Add JQuery adapter support
+ * 4035ca0 - Upgrade CKEditor to 4.4.6
+ * 280abf1 - [Travis] Update config
+ * 00086ab - Add .gitattributes
+ * 3c82c18 - [Readme] Fix badge uri
+ * 6feb086 - [DependencyInjection] Remove *.class parameters
+ * 588ffa3 - [Test] Remove bootstrap.php
+ * cc0a387 - [Encapsulation] Move everything from protected to private (except for entry point)
+ * 03045fd - [Form] Add input_sync option
+
 ### 2.5.2 (2014-11-08)
 
  * 900d69b - [Config] Fix language conversion

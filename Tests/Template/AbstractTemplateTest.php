@@ -18,6 +18,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * Abstract template test.
  *
  * @author GeLo <geloen.eric@gmail.com>
+ * @author Adam Misiorny <adam.misiorny@gmail.com>
  */
 abstract class AbstractTemplateTest extends \PHPUnit_Framework_TestCase
 {
@@ -25,13 +26,13 @@ abstract class AbstractTemplateTest extends \PHPUnit_Framework_TestCase
     protected $helper;
 
     /** @var \Symfony\Component\DependencyInjection\ContainerInterface|\PHPUnit_Framework_MockObject_MockObject */
-    protected $containerMock;
+    private $containerMock;
 
-    /** @var \Symfony\Component\Templating\Helper\CoreAssetsHelper|\PHPUnit_Framework_MockObject_MockObject */
-    protected $assetsHelperMock;
+    /** @var \Symfony\Component\Asset\Packages|\Symfony\Component\Templating\Helper\CoreAssetsHelper|\PHPUnit_Framework_MockObject_MockObject */
+    private $assetsHelperMock;
 
     /** @var \Symfony\Component\Routing\RouterInterface|\PHPUnit_Framework_MockObject_MockObject */
-    protected $routerMock;
+    private $routerMock;
 
     /**
      * {@inheritdoc}
@@ -40,9 +41,15 @@ abstract class AbstractTemplateTest extends \PHPUnit_Framework_TestCase
     {
         $this->routerMock = $this->getMock('Symfony\Component\Routing\RouterInterface');
 
-        $this->assetsHelperMock = $this->getMockBuilder('Symfony\Component\Templating\Helper\CoreAssetsHelper')
-            ->disableOriginalConstructor()
-            ->getMock();
+        if (class_exists('Symfony\Component\Asset\Packages')) {
+            $this->assetsHelperMock = $this->getMockBuilder('Symfony\Component\Asset\Packages')
+                ->disableOriginalConstructor()
+                ->getMock();
+        } else {
+            $this->assetsHelperMock = $this->getMockBuilder('Symfony\Component\Templating\Helper\CoreAssetsHelper')
+                ->disableOriginalConstructor()
+                ->getMock();
+        }
 
         $this->assetsHelperMock
             ->expects($this->any())
@@ -55,14 +62,14 @@ abstract class AbstractTemplateTest extends \PHPUnit_Framework_TestCase
             ->method('get')
             ->will($this->returnValueMap(array(
                 array(
-                    'templating.helper.assets',
+                    'assets.packages',
                     ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE,
                     $this->assetsHelperMock,
                 ),
                 array(
                     'router',
                     ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE,
-                    $this->routerMock
+                    $this->routerMock,
                 ),
             )));
 
@@ -82,22 +89,6 @@ abstract class AbstractTemplateTest extends \PHPUnit_Framework_TestCase
 
     public function testRenderWithSimpleWidget()
     {
-        $output = $this->renderTemplate(
-            array(
-                'form'      => $this->getMock('Symfony\Component\Form\FormView'),
-                'id'        => 'id',
-                'value'     => '<p>value</p>',
-                'enable'    => true,
-                'autoload'  => true,
-                'base_path' => 'base_path',
-                'js_path'   => 'js_path',
-                'config'    => array(),
-                'plugins'   => array(),
-                'styles'    => array(),
-                'templates' => array(),
-            )
-        );
-
         $expected = <<<EOF
 <textarea >&lt;p&gt;value&lt;/p&gt;</textarea>
 <script type="text/javascript">
@@ -113,41 +104,35 @@ CKEDITOR.replace("id", []);
 
 EOF;
 
-        $this->assertSame($this->normalizeOutput($expected), $this->normalizeOutput($output));
+        $this->assertTemplate($expected, $this->getContext());
     }
 
     public function testRenderWithFullWidget()
     {
-        $output = $this->renderTemplate(
-            array(
-                'form'      => $this->getMock('Symfony\Component\Form\FormView'),
-                'id'        => 'id',
-                'value'     => '<p>value</p>',
-                'enable'    => true,
-                'autoload'  => true,
-                'base_path' => 'base_path',
-                'js_path'   => 'js_path',
-                'config'    => array('foo' => 'bar'),
-                'plugins'   => array(
-                    'foo' => array('path' => 'path', 'filename' => 'filename'),
+        $context = array(
+            'inline' => true,
+            'jquery' => true,
+            'input_sync' => true,
+            'config' => array('foo' => 'bar'),
+            'plugins' => array(
+                'foo' => array('path' => 'path', 'filename' => 'filename'),
+            ),
+            'styles' => array(
+                'default' => array(
+                    array('name' => 'Blue Title', 'element' => 'h2', 'styles' => array('color' => 'Blue')),
                 ),
-                'styles'    => array(
-                    'default' => array(
-                        array('name' => 'Blue Title', 'element' => 'h2', 'styles' => array('color' => 'Blue')),
+            ),
+            'templates' => array(
+                'foo' => array(
+                    'imagesPath' => 'path',
+                    'templates' => array(
+                        array(
+                            'title' => 'My Template',
+                            'html' => '<h1>Template</h1>',
+                        ),
                     ),
                 ),
-                'templates' => array(
-                    'foo' => array(
-                        'imagesPath' => 'path',
-                        'templates'  => array(
-                            array(
-                                'title' => 'My Template',
-                                'html'  => '<h1>Template</h1>',
-                            ),
-                        ),
-                    )
-                ),
-            )
+            ),
         );
 
         $expected = <<<EOF
@@ -156,37 +141,27 @@ EOF;
 var CKEDITOR_BASEPATH = "base_path";
 </script>
 <script type="text/javascript" src="js_path"></script>
+<script type="text/javascript" src="jquery_path"></script>
 <script type="text/javascript">
+$(function () {
 if (CKEDITOR.instances["id"]) {
 delete CKEDITOR.instances["id"];
 }
 CKEDITOR.plugins.addExternal("foo", "path", "filename");
 if (CKEDITOR.stylesSet.get("default") === null) { CKEDITOR.stylesSet.add("default", [{"name":"Blue Title","element":"h2","styles":{"color":"Blue"}}]); }
 CKEDITOR.addTemplates("foo", {"imagesPath":"path","templates":[{"title":"My Template","html":"<h1>Template<\/h1>"}]});
-CKEDITOR.replace("id", {"foo":"bar"});
+var ivory_ckeditor_id = CKEDITOR.inline("id", {"foo":"bar"});
+ivory_ckeditor_id.on('change', function(){ ivory_ckeditor_id.updateElement(); });
+});
 </script>
 
 EOF;
 
-        $this->assertSame($this->normalizeOutput($expected), $this->normalizeOutput($output));
+        $this->assertTemplate($expected, array_merge($this->getContext(), $context));
     }
 
     public function testRenderWithNotAutoloadedWidget()
     {
-        $output = $this->renderTemplate(
-            array(
-                'form'      => $this->getMock('Symfony\Component\Form\FormView'),
-                'id'        => 'id',
-                'value'     => '<p>value</p>',
-                'enable'    => true,
-                'autoload'  => false,
-                'config'    => array(),
-                'plugins'   => array(),
-                'styles'    => array(),
-                'templates' => array(),
-            )
-        );
-
         $expected = <<<EOF
 <textarea >&lt;p&gt;value&lt;/p&gt;</textarea>
 <script type="text/javascript">
@@ -198,26 +173,17 @@ CKEDITOR.replace("id", []);
 
 EOF;
 
-        $this->assertSame($this->normalizeOutput($expected), $this->normalizeOutput($output));
+        $this->assertTemplate($expected, array_merge($this->getContext(), array('autoload' => false)));
     }
 
     public function testRenderWithDisableWidget()
     {
-        $output = $this->renderTemplate(
-            array(
-                'form'   => $this->getMock('Symfony\Component\Form\FormView'),
-                'id'     => 'id',
-                'value'  => '<p>value</p>',
-                'enable' => false,
-            )
-        );
-
         $expected = <<<EOF
 <textarea >&lt;p&gt;value&lt;/p&gt;</textarea>
 
 EOF;
 
-        $this->assertSame($this->normalizeOutput($expected), $this->normalizeOutput($output));
+        $this->assertTemplate($expected, array_merge($this->getContext(), array('enable' => false)));
     }
 
     /**
@@ -230,13 +196,50 @@ EOF;
     abstract protected function renderTemplate(array $context = array());
 
     /**
+     * Gets the context.
+     *
+     * @return array The context.
+     */
+    private function getContext()
+    {
+        return array(
+            'form'        => $this->getMock('Symfony\Component\Form\FormView'),
+            'id'          => 'id',
+            'value'       => '<p>value</p>',
+            'enable'      => true,
+            'autoload'    => true,
+            'inline'      => false,
+            'jquery'      => false,
+            'input_sync'  => false,
+            'base_path'   => 'base_path',
+            'js_path'     => 'js_path',
+            'jquery_path' => 'jquery_path',
+            'config'      => array(),
+            'plugins'     => array(),
+            'styles'      => array(),
+            'templates'   => array(),
+        );
+    }
+
+    /**
+     * Asserts a template.
+     *
+     * @param string $expected The expected template.
+     * @param array  $context  The context.
+     */
+    private function assertTemplate($expected, array $context)
+    {
+        $this->assertSame($this->normalizeOutput($expected), $this->normalizeOutput($this->renderTemplate($context)));
+    }
+
+    /**
      * Normalizes the output by removing the heading whitespaces.
      *
      * @param string $output The output.
      *
      * @return string The normalized output.
      */
-    protected function normalizeOutput($output)
+    private function normalizeOutput($output)
     {
         return str_replace(PHP_EOL, '', str_replace(' ', '', $output));
     }

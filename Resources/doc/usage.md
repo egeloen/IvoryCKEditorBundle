@@ -84,6 +84,23 @@ $builder->add('field', 'ckeditor', array(
 ));
 ```
 
+## Skin support
+
+Download a skin from [CKEditor](http://ckeditor.com/addons/skins/all) & extract it in the web or bundle resource directory:
+
+ex: `/web/ckeditor/skins/`
+
+### Register
+
+Place the following code on your config.yml and change the skin name
+
+```
+ivory_ck_editor:
+    configs:
+        my_config:
+            skin: "skin_name,/absolute/web/skin/path/" # ex: ckeditor/skins/skin_name/ if you placed in the web directory
+```
+
 ## StylesSet support
 
 The bundle allows you to define your own styles. Like plugins, you can define them at the form level or in your
@@ -98,6 +115,7 @@ $builder->add('field', 'ckeditor', array(
         'my_styles' => array(
             array('name' => 'Blue Title', 'element' => 'h2', 'styles' => array('color' => 'Blue')),
             array('name' => 'CSS Style', 'element' => 'span', 'attributes' => array('class' => 'my_style')),
+            array('name' => 'Multiple Element Style', 'element' => array('h2', 'span'), 'attributes' => array('class' => 'my_class')),
             array('name' => 'Widget Style', 'type' => 'widget' => 'widget' => 'my_widget', 'attributes' => array('class' => 'my_widget_style')),
         ),
     ),
@@ -185,6 +203,73 @@ $builder->add('field', 'ckeditor', array('autoload' => false));
 ```
 
 Be aware, the library must be loaded before any field have been rendered.
+
+## Inline support
+
+By default, the bundle uses a [classic editing](http://docs.ckeditor.com/#!/guide/dev_framed) which relies on
+`CKEDITOR.replace`. If you want to use the [inline editing](http://docs.ckeditor.com/#!/guide/dev_inline) which relies
+on `CKEDITOR.inline`, you can configure it globally:
+
+``` yaml
+ivory_ck_editor:
+    inline: true
+```
+
+Or, if you just want to enable it for a specific field, you can use:
+
+``` php
+$builder->add('field', 'ckeditor', array('inline' => true));
+```
+
+## JQuery adapter
+
+The CKEditor JQuery adapter is by default not loaded even if the `autoload` option is enabled. In order to load it,
+the `autoload` flag must be enabled and you must explicitely enable the jquery adapter. You can do it globally:
+
+``` yaml
+ivory_ck_editor:
+    jquery: true
+```
+
+Or, if you just want to enable it for a specific field, you can use:
+
+``` php
+$builder->add('field', 'ckeditor', array('jquery' => true));
+```
+
+We recommend to use JQuery adapter if your app relies on JQuery.
+It allows to wrap CKEditor code in `$(document).ready()`
+
+Additionally, by default, the JQuery adapter used is the [one](/Resources/public/adapters/jquery.js) shipped with the
+bundle. If you want to use your own, you can configure it globally:
+
+``` yaml
+ivory_ck_editor:
+    jquery_path: your/own/jquery.js
+```
+
+Or, you can configure it just for a specific field:
+
+``` php
+$builder->add('field', 'ckeditor', array('jquery_path' => 'your/own/jquery.js'));
+```
+
+## Synchronize the textarea
+
+When the textarea is transformed into a CKEditor widget, the textarea value is no more populated except for form
+submission. Then, it leads to issues when you try to serialize form in javascript or you try to rely on the textare
+value. To automatically synchronize the textarea value, you can do it globally:
+
+``` yaml
+ivory_ck_editor:
+    input_sync: true
+```
+
+Or, you can do it locally:
+
+``` php
+$builder->add('field', 'ckeditor', array('input_sync' => true));
+```
 
 ## Fallback to textarea for testing purpose
 

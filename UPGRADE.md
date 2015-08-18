@@ -1,5 +1,20 @@
 # UPGRADE
 
+### 2.5 to 3.0
+
+All protected properties and methods have been updated to private except for entry points. This is mostly motivated for
+enforcing the encapsulation and easing backward compatibility.
+
+The `Ivory\CKEditorBundle\Templating\CKEditorHelper::renderReplace`,
+`Ivory\CKEditorBundle\Twig\CKEditorExtension::renderReplace` methods and the `ckeditor_replace` twig function have
+been renamed respectively to `renderWidget` and `ckeditor_widget`. There prototypes have been updated too. They
+now take the newly intoduced `inline` option as third argument and so, the `inputSync` parameter have been moved
+forward.
+
+The `Ivory\CKEditorBundle\Form\Type\CKEditorType` scalar constructor values have been dropped in order to more easily
+keep further backward compatibility. Then, the `ivory_ck_editor.form.type.*` related container parameters have been
+dropped accordingly.
+
 ### 2.4 to 2.5
 
 It is not possible to automatically load the ckeditor library only once. Then, the

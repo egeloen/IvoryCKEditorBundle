@@ -19,29 +19,36 @@ use Symfony\Component\Routing\RouterInterface;
  * CKEditor helper test.
  *
  * @author GeLo <geloen.eric@gmail.com>
+ * @author Adam Misiorny <adam.misiorny@gmail.com>
  */
 class CKEditorHelperTest extends \PHPUnit_Framework_TestCase
 {
     /** @var \Ivory\CKEditorBundle\Templating\CKEditorHelper */
-    protected $helper;
+    private $helper;
 
     /** @var \Symfony\Component\DependencyInjection\ContainerInterface|\PHPUnit_Framework_MockObject_MockObject */
-    protected $containerMock;
+    private $containerMock;
 
-    /** @var \Symfony\Component\Templating\Helper\CoreAssetsHelper|\PHPUnit_Framework_MockObject_MockObject */
-    protected $assetsHelperMock;
+    /** @var \Symfony\Component\Asset\Packages|\Symfony\Component\Templating\Helper\CoreAssetsHelper|\PHPUnit_Framework_MockObject_MockObject */
+    private $assetsHelperMock;
 
     /** @var \Symfony\Component\Routing\RouterInterface|\PHPUnit_Framework_MockObject_MockObject */
-    protected $routerMock;
+    private $routerMock;
 
     /**
      * {@inheritdoc}
      */
     protected function setUp()
     {
-        $this->assetsHelperMock = $this->getMockBuilder('Symfony\Component\Templating\Helper\CoreAssetsHelper')
-            ->disableOriginalConstructor()
-            ->getMock();
+        if (class_exists('Symfony\Component\Asset\Packages')) {
+            $this->assetsHelperMock = $this->getMockBuilder('Symfony\Component\Asset\Packages')
+                ->disableOriginalConstructor()
+                ->getMock();
+        } else {
+            $this->assetsHelperMock = $this->getMockBuilder('Symfony\Component\Templating\Helper\CoreAssetsHelper')
+                ->disableOriginalConstructor()
+                ->getMock();
+        }
 
         $this->routerMock = $this->getMock('Symfony\Component\Routing\RouterInterface');
 
@@ -51,14 +58,14 @@ class CKEditorHelperTest extends \PHPUnit_Framework_TestCase
             ->method('get')
             ->will($this->returnValueMap(array(
                 array(
-                    'templating.helper.assets',
+                    'assets.packages',
                     ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE,
                     $this->assetsHelperMock,
                 ),
                 array(
                     'router',
                     ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE,
-                    $this->routerMock
+                    $this->routerMock,
                 ),
             )));
 
@@ -165,18 +172,18 @@ class CKEditorHelperTest extends \PHPUnit_Framework_TestCase
     /**
      * @dataProvider languageProvider
      */
-    public function testRenderReplaceWithLanguage($symfonyLocale, $ckEditorLocale)
+    public function testRenderWidgetWithLanguage($symfonyLocale, $ckEditorLocale)
     {
         $this->assertSame(
             'CKEDITOR.replace("foo", {"language":"'.$ckEditorLocale.'"});',
-            $this->helper->renderReplace('foo', array('language' => $symfonyLocale))
+            $this->helper->renderWidget('foo', array('language' => $symfonyLocale))
         );
     }
 
     /**
      * @dataProvider pathProvider
      */
-    public function testRenderReplaceWithStringContentsCss($path, $asset, $url)
+    public function testRenderWidgetWithStringContentsCss($path, $asset, $url)
     {
         $this->assetsHelperMock
             ->expects($this->once())
@@ -186,14 +193,14 @@ class CKEditorHelperTest extends \PHPUnit_Framework_TestCase
 
         $this->assertSame(
             'CKEDITOR.replace("foo", {"contentsCss":['.json_encode($url).']});',
-            $this->helper->renderReplace('foo', array('contentsCss' => $path))
+            $this->helper->renderWidget('foo', array('contentsCss' => $path))
         );
     }
 
     /**
      * @dataProvider pathsProvider
      */
-    public function testRenderReplaceWithArrayContentsCss(array $paths, array $assets, array $urls)
+    public function testRenderWidgetWithArrayContentsCss(array $paths, array $assets, array $urls)
     {
         foreach (array_keys($paths) as $key) {
             $this->assetsHelperMock
@@ -205,14 +212,14 @@ class CKEditorHelperTest extends \PHPUnit_Framework_TestCase
 
         $this->assertSame(
             'CKEDITOR.replace("foo", {"contentsCss":'.json_encode($urls).'});',
-            $this->helper->renderReplace('foo', array('contentsCss' => $paths))
+            $this->helper->renderWidget('foo', array('contentsCss' => $paths))
         );
     }
 
     /**
      * @dataProvider filebrowserProvider
      */
-    public function testRenderReplaceWithFileBrowser($filebrowser)
+    public function testRenderWidgetWithFileBrowser($filebrowser)
     {
         $this->routerMock
             ->expects($this->once())
@@ -226,7 +233,7 @@ class CKEditorHelperTest extends \PHPUnit_Framework_TestCase
 
         $this->assertSame(
             'CKEDITOR.replace("foo", {"filebrowser'.$filebrowser.'Url":"browse_url"});',
-            $this->helper->renderReplace('foo', array(
+            $this->helper->renderWidget('foo', array(
                 'filebrowser'.$filebrowser.'Route'           => 'browse_route',
                 'filebrowser'.$filebrowser.'RouteParameters' => array('foo' => 'bar'),
                 'filebrowser'.$filebrowser.'RouteAbsolute'   => true,
@@ -237,7 +244,7 @@ class CKEditorHelperTest extends \PHPUnit_Framework_TestCase
     /**
      * @dataProvider filebrowserProvider
      */
-    public function testRenderReplaceWithFileBrowserHandler($filebrowser)
+    public function testRenderWidgetWithFileBrowserHandler($filebrowser)
     {
         $this->routerMock
             ->expects($this->once())
@@ -251,7 +258,7 @@ class CKEditorHelperTest extends \PHPUnit_Framework_TestCase
 
         $this->assertSame(
             'CKEDITOR.replace("foo", {"filebrowser'.$filebrowser.'Url":"browse_url"});',
-            $this->helper->renderReplace('foo', array(
+            $this->helper->renderWidget('foo', array(
                 'filebrowser'.$filebrowser.'Handler' => function (RouterInterface $router) {
                     return $router->generate('browse_route', array('foo' => 'bar'), true);
                 },
@@ -259,50 +266,68 @@ class CKEditorHelperTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    public function testRenderReplaceWithProtectedSource()
+    public function testRenderWidgetWithProtectedSource()
     {
         $this->assertSame(
             'CKEDITOR.replace("foo", {"protectedSource":[/<\?[\s\S]*?\?>/g,/<%[\s\S]*?%>/g]});',
-            $this->helper->renderReplace('foo', array(
+            $this->helper->renderWidget('foo', array(
                 'protectedSource' => array(
                     '/<\?[\s\S]*?\?>/g',
                     '/<%[\s\S]*?%>/g',
-                )
+                ),
             ))
         );
     }
 
-    public function testRenderReplaceWithStylesheetParserSkipSelectors()
+    public function testRenderWidgetWithStylesheetParserSkipSelectors()
     {
         $this->assertSame(
             'CKEDITOR.replace("foo", {"stylesheetParser_skipSelectors":/(^body\.|^caption\.|\.high|^\.)/i});',
-            $this->helper->renderReplace('foo', array(
+            $this->helper->renderWidget('foo', array(
                 'stylesheetParser_skipSelectors' => '/(^body\.|^caption\.|\.high|^\.)/i',
             ))
         );
     }
 
-    public function testRenderReplaceWithStylesheetParserValidSelectors()
+    public function testRenderWidgetWithStylesheetParserValidSelectors()
     {
         $this->assertSame(
             'CKEDITOR.replace("foo", {"stylesheetParser_validSelectors":/\^(p|span)\.\w+/});',
-            $this->helper->renderReplace('foo', array(
+            $this->helper->renderWidget('foo', array(
                 'stylesheetParser_validSelectors' => '/\^(p|span)\.\w+/',
             ))
         );
     }
 
-    public function testRenderReplaceWithCKEditorConstants()
+    public function testRenderWidgetWithCKEditorConstants()
     {
         $this->assertSame(
             'CKEDITOR.replace("foo", {"config":{"enterMode":CKEDITOR.ENTER_BR,"shiftEnterMode":CKEDITOR.ENTER_BR}});',
-            $this->helper->renderReplace('foo', array(
+            $this->helper->renderWidget('foo', array(
                 'config' => array(
                     'enterMode'      => 'CKEDITOR.ENTER_BR',
                     'shiftEnterMode' => 'CKEDITOR.ENTER_BR',
                 ),
             ))
         );
+    }
+
+    public function testRenderWidgetWithInline()
+    {
+        $this->assertSame(
+            'CKEDITOR.inline("foo", []);',
+            $this->helper->renderWidget('foo', array(), true)
+        );
+    }
+
+    public function testRenderWidgetWithInputSync()
+    {
+        $expected = <<<EOF
+var ivory_ckeditor_foo = CKEDITOR.replace("foo", []);
+ivory_ckeditor_foo.on('change', function() { ivory_ckeditor_foo.updateElement(); });
+EOF;
+
+        $this->assertSame($expected, $this->helper->renderWidget('foo', array(), false, true));
     }
 
     public function testRenderDestroy()

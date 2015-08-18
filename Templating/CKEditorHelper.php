@@ -19,14 +19,15 @@ use Symfony\Component\Templating\Helper\Helper;
  * CKEditor helper.
  *
  * @author GeLo <geloen.eric@gmail.com>
+ * @author Adam Misiorny <adam.misiorny@gmail.com>
  */
 class CKEditorHelper extends Helper
 {
     /** @var \Ivory\JsonBuilder\JsonBuilder */
-    protected $jsonBuilder;
+    private $jsonBuilder;
 
     /** @var \Symfony\Component\DependencyInjection\ContainerInterface */
-    protected $container;
+    private $container;
 
     /**
      * Creates a CKEditor template helper.
@@ -64,14 +65,16 @@ class CKEditorHelper extends Helper
     }
 
     /**
-     * Renders the replace.
+     * Renders the widget.
      *
-     * @param string $id     The identifier.
-     * @param array  $config The config.
+     * @param string  $id        The identifier.
+     * @param array   $config    The config.
+     * @param boolean $inline    TRUE if the widget is inlined else FALSE.
+     * @param boolean $inputSync TRUE if the input is synchronized with the CKEditor instance else FALSE.
      *
-     * @return string The rendered replace.
+     * @return string The rendered widget.
      */
-    public function renderReplace($id, array $config)
+    public function renderWidget($id, array $config, $inline = false, $inputSync = false)
     {
         $config = $this->fixConfigLanguage($config);
         $config = $this->fixConfigContentsCss($config);
@@ -83,7 +86,21 @@ class CKEditorHelper extends Helper
 
         $this->fixConfigEscapedValues($config);
 
-        return sprintf('CKEDITOR.replace("%s", %s);', $id, $this->fixConfigConstants($this->jsonBuilder->build()));
+        $replace = sprintf(
+            'CKEDITOR.%s("%s", %s);',
+            $inline ? 'inline' : 'replace',
+            $id,
+            $this->fixConfigConstants($this->jsonBuilder->build())
+        );
+
+        if ($inputSync) {
+            $variable = 'ivory_ckeditor_'.$id;
+            $replace = 'var '.$variable.' = '.$replace.PHP_EOL;
+
+            return $replace.$variable.'.on(\'change\', function() { '.$variable.'.updateElement(); });';
+        }
+
+        return $replace;
     }
 
     /**
@@ -192,7 +209,7 @@ class CKEditorHelper extends Helper
      *
      * @return array The fixed config.
      */
-    protected function fixConfigContentsCss(array $config)
+    private function fixConfigContentsCss(array $config)
     {
         if (isset($config['contentsCss'])) {
             $cssContents = (array) $config['contentsCss'];
@@ -213,9 +230,9 @@ class CKEditorHelper extends Helper
      *
      * @return array The fixed config.
      */
-    protected function fixConfigFilebrowsers(array $config)
+    private function fixConfigFilebrowsers(array $config)
     {
-        $filebrowserKeys = array(
+        $keys = array(
             'Browse',
             'FlashBrowse',
             'ImageBrowse',
@@ -225,27 +242,28 @@ class CKEditorHelper extends Helper
             'ImageUpload',
         );
 
-        foreach ($filebrowserKeys as $filebrowserKey) {
-            $filebrowserHandler = 'filebrowser'.$filebrowserKey.'Handler';
-            $filebrowserUrl = 'filebrowser'.$filebrowserKey.'Url';
-            $filebrowserRoute = 'filebrowser'.$filebrowserKey.'Route';
-            $filebrowserRouteParameters = 'filebrowser'.$filebrowserKey.'RouteParameters';
-            $filebrowserRouteAbsolute = 'filebrowser'.$filebrowserKey.'RouteAbsolute';
+        foreach ($keys as $key) {
+            $fileBrowserKey = 'filebrowser'.$key;
+            $handler = $fileBrowserKey.'Handler';
+            $url = $fileBrowserKey.'Url';
+            $route = $fileBrowserKey.'Route';
+            $routeParameters = $fileBrowserKey.'RouteParameters';
+            $routeAbsolute = $fileBrowserKey.'RouteAbsolute';
 
-            if (isset($config[$filebrowserHandler])) {
-                $config[$filebrowserUrl] = $config[$filebrowserHandler]($this->getRouter());
-            } elseif (isset($config[$filebrowserRoute])) {
-                $config[$filebrowserUrl] = $this->getRouter()->generate(
-                    $config[$filebrowserRoute],
-                    isset($config[$filebrowserRouteParameters]) ? $config[$filebrowserRouteParameters] : array(),
-                    isset($config[$filebrowserRouteAbsolute]) ? $config[$filebrowserRouteAbsolute] : false
+            if (isset($config[$handler])) {
+                $config[$url] = $config[$handler]($this->getRouter());
+            } elseif (isset($config[$route])) {
+                $config[$url] = $this->getRouter()->generate(
+                    $config[$route],
+                    isset($config[$routeParameters]) ? $config[$routeParameters] : array(),
+                    isset($config[$routeAbsolute]) ? $config[$routeAbsolute] : false
                 );
             }
 
-            unset($config[$filebrowserHandler]);
-            unset($config[$filebrowserRoute]);
-            unset($config[$filebrowserRouteParameters]);
-            unset($config[$filebrowserRouteAbsolute]);
+            unset($config[$handler]);
+            unset($config[$route]);
+            unset($config[$routeParameters]);
+            unset($config[$routeAbsolute]);
         }
 
         return $config;
@@ -256,7 +274,7 @@ class CKEditorHelper extends Helper
      *
      * @param array $config The config.
      */
-    protected function fixConfigEscapedValues(array $config)
+    private function fixConfigEscapedValues(array $config)
     {
         if (isset($config['protectedSource'])) {
             foreach ($config['protectedSource'] as $key => $value) {
@@ -283,7 +301,7 @@ class CKEditorHelper extends Helper
      *
      * @return string The fixed config.
      */
-    protected function fixConfigConstants($json)
+    private function fixConfigConstants($json)
     {
         return preg_replace('/"(CKEDITOR\.[A-Z_]+)"/', '$1', $json);
     }
@@ -295,7 +313,7 @@ class CKEditorHelper extends Helper
      *
      * @return string The fixed path.
      */
-    protected function fixPath($path)
+    private function fixPath($path)
     {
         if (($position = strpos($path, '?')) !== false) {
             return substr($path, 0, $position);
@@ -307,11 +325,11 @@ class CKEditorHelper extends Helper
     /**
      * Gets the assets helper.
      *
-     * @return \Symfony\Component\Templating\Helper\CoreAssetsHelper The assets helper.
+     * @return \Symfony\Component\Asset\Packages|\Symfony\Component\Templating\Helper\CoreAssetsHelper The assets helper.
      */
-    protected function getAssetsHelper()
+    private function getAssetsHelper()
     {
-        return $this->container->get('templating.helper.assets');
+        return $this->container->get('assets.packages');
     }
 
     /**
@@ -319,7 +337,7 @@ class CKEditorHelper extends Helper
      *
      * @return \Symfony\Component\Routing\RouterInterface The router.
      */
-    protected function getRouter()
+    private function getRouter()
     {
         return $this->container->get('router');
     }

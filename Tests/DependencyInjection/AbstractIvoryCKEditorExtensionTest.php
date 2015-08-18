@@ -11,6 +11,7 @@
 
 namespace Ivory\CKEditorBundle\Tests\DependencyInjection;
 
+use Ivory\CKEditorBundle\DependencyInjection\Compiler\ResourceCompilerPass;
 use Ivory\CKEditorBundle\DependencyInjection\IvoryCKEditorExtension;
 use Ivory\CKEditorBundle\Tests\Fixtures\Extension\FrameworkExtension;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -19,32 +20,39 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
  * Abstract Ivory CKEditor extension test.
  *
  * @author GeLo <geloen.eric@gmail.com>
+ * @author Adam Misiorny <adam.misiorny@gmail.com>
  */
 abstract class AbstractIvoryCKEditorExtensionTest extends \PHPUnit_Framework_TestCase
 {
     /** @var \Symfony\Component\DependencyInjection\ContainerBuilder */
-    protected $container;
+    private $container;
 
-    /** @var \Symfony\Component\Templating\Helper\CoreAssetsHelper|\PHPUnit_Framework_MockObject_MockObject */
-    protected $assetsHelperMock;
+    /** @var \Symfony\Component\Asset\Packages|\Symfony\Component\Templating\Helper\CoreAssetsHelper|\PHPUnit_Framework_MockObject_MockObject */
+    private $assetsHelperMock;
 
     /** @var \Symfony\Component\Routing\RouterInterface|\PHPUnit_Framework_MockObject_MockObject */
-    protected $routerMock;
+    private $routerMock;
 
     /**
      * {@inheritdoc}
      */
     protected function setUp()
     {
-        $this->assetsHelperMock = $this->getMockBuilder('Symfony\Component\Templating\Helper\CoreAssetsHelper')
-            ->disableOriginalConstructor()
-            ->getMock();
+        if (class_exists('Symfony\Component\Asset\Packages')) {
+            $this->assetsHelperMock = $this->getMockBuilder('Symfony\Component\Asset\Packages')
+                ->disableOriginalConstructor()
+                ->getMock();
+        } else {
+            $this->assetsHelperMock = $this->getMockBuilder('Symfony\Component\Templating\Helper\CoreAssetsHelper')
+                ->disableOriginalConstructor()
+                ->getMock();
+        }
 
         $this->routerMock = $this->getMock('Symfony\Component\Routing\RouterInterface');
 
         $this->container = new ContainerBuilder();
 
-        $this->container->set('templating.helper.assets', $this->assetsHelperMock);
+        $this->container->set('assets.packages', $this->assetsHelperMock);
         $this->container->set('router', $this->routerMock);
 
         $this->container->registerExtension($framework = new FrameworkExtension());
@@ -81,33 +89,16 @@ abstract class AbstractIvoryCKEditorExtensionTest extends \PHPUnit_Framework_Tes
         $this->assertInstanceOf('Ivory\CKEditorBundle\Form\Type\CKEditorType', $type);
         $this->assertTrue($type->isEnable());
         $this->assertTrue($type->isAutoload());
+        $this->assertFalse($type->isInline());
+        $this->assertFalse($type->useJquery());
+        $this->assertFalse($type->isInputSync());
         $this->assertSame('bundles/ivoryckeditor/', $type->getBasePath());
         $this->assertSame('bundles/ivoryckeditor/ckeditor.js', $type->getJsPath());
+        $this->assertSame('bundles/ivoryckeditor/adapters/jquery.js', $type->getJqueryPath());
         $this->assertSame($this->container->get('ivory_ck_editor.config_manager'), $type->getConfigManager());
         $this->assertSame($this->container->get('ivory_ck_editor.plugin_manager'), $type->getPluginManager());
         $this->assertSame($this->container->get('ivory_ck_editor.styles_set_manager'), $type->getStylesSetManager());
         $this->assertSame($this->container->get('ivory_ck_editor.template_manager'), $type->getTemplateManager());
-    }
-
-    public function testTwigResources()
-    {
-        $this->container->compile();
-
-        $this->assertTrue(
-            in_array(
-                'IvoryCKEditorBundle:Form:ckeditor_widget.html.twig',
-                $this->container->getParameter('twig.form.resources')
-            )
-        );
-    }
-
-    public function testPhpResources()
-    {
-        $this->container->compile();
-
-        $this->assertTrue(
-            in_array('IvoryCKEditorBundle:Form', $this->container->getParameter('templating.helper.form.resources'))
-        );
     }
 
     public function testDisable()
@@ -124,6 +115,38 @@ abstract class AbstractIvoryCKEditorExtensionTest extends \PHPUnit_Framework_Tes
         $this->container->compile();
 
         $this->assertFalse($this->container->get('ivory_ck_editor.form.type')->isAutoload());
+    }
+
+    public function testInline()
+    {
+        $this->loadConfiguration($this->container, 'inline');
+        $this->container->compile();
+
+        $this->assertTrue($this->container->get('ivory_ck_editor.form.type')->isInline());
+    }
+
+    public function testInputSync()
+    {
+        $this->loadConfiguration($this->container, 'input_sync');
+        $this->container->compile();
+
+        $this->assertTrue($this->container->get('ivory_ck_editor.form.type')->isInputSync());
+    }
+
+    public function testJquery()
+    {
+        $this->loadConfiguration($this->container, 'jquery');
+        $this->container->compile();
+
+        $this->assertTrue($this->container->get('ivory_ck_editor.form.type')->useJquery());
+    }
+
+    public function testJqueryPath()
+    {
+        $this->loadConfiguration($this->container, 'jquery_path');
+        $this->container->compile();
+
+        $this->assertSame('foo/jquery.js', $this->container->get('ivory_ck_editor.form.type')->getJqueryPath());
     }
 
     public function testSingleConfiguration()
@@ -235,10 +258,28 @@ abstract class AbstractIvoryCKEditorExtensionTest extends \PHPUnit_Framework_Tes
 
         $expected = array(
             'default' => array(
-                array('name' => 'Blue Title', 'element' => 'h2', 'styles' => array('text-decoration' => 'underline')),
-                array('name' => 'CSS Style', 'element' => 'span', 'attributes' => array('data-class' => 'my-style')),
-                array('name' => 'Widget Style', 'type' => 'widget', 'widget' => 'my-widget', 'attributes' => array('data-class' => 'my-style')),
-            )
+                array(
+                    'name'    => 'Blue Title',
+                    'element' => 'h2',
+                    'styles'  => array('text-decoration' => 'underline'),
+                ),
+                array(
+                    'name'       => 'CSS Style',
+                    'element'    => 'span',
+                    'attributes' => array('data-class' => 'my-style'),
+                ),
+                array(
+                    'name'       => 'Widget Style',
+                    'type'       => 'widget',
+                    'widget'     => 'my-widget',
+                    'attributes' => array('data-class' => 'my-style'),
+                ),
+                array(
+                    'name'       => 'Multiple Elements Style',
+                    'element'    => array('span', 'p', 'h3'),
+                    'attributes' => array('data-class' => 'my-style'),
+                ),
+            ),
         );
 
         $this->assertSame($expected, $this->container->get('ivory_ck_editor.styles_set_manager')->getStylesSets());
@@ -275,6 +316,15 @@ abstract class AbstractIvoryCKEditorExtensionTest extends \PHPUnit_Framework_Tes
 
         $this->assertSame('foo', $ckEditorType->getBasePath());
         $this->assertSame('foo/ckeditor.js', $ckEditorType->getJsPath());
+    }
+
+    public function testTemplatingConfiguration()
+    {
+        $this->container->compile();
+
+        $helper = $this->container->get('ivory_ck_editor.templating.helper');
+
+        $this->assertInstanceOf('Ivory\CKEditorBundle\Templating\CKEditorHelper', $helper);
     }
 
     /**

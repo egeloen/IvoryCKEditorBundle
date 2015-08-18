@@ -22,22 +22,22 @@ use Symfony\Component\Form\Forms;
 class CKEditorTypeTest extends \PHPUnit_Framework_TestCase
 {
     /** @var \Symfony\Component\Form\FormFactoryInterface */
-    protected $factory;
+    private $factory;
 
     /** @var \Ivory\CKEditorBundle\Form\Type\CKEditorType */
-    protected $ckEditorType;
+    private $ckEditorType;
 
     /** @var \Ivory\CKEditorBundle\Model\ConfigManagerInterface|\PHPUnit_Framework_MockObject_MockObject */
-    protected $configManagerMock;
+    private $configManagerMock;
 
     /** @var \Ivory\CKEditorBundle\Model\PluginManagerInterface|\PHPUnit_Framework_MockObject_MockObject */
-    protected $pluginManagerMock;
+    private $pluginManagerMock;
 
     /** @var \Ivory\CKEditorBundle\Model\StylesSetManagerInterface|\PHPUnit_Framework_MockObject_MockObject */
-    protected $stylesSetManagerMock;
+    private $stylesSetManagerMock;
 
     /** @var \Ivory\CKEditorBundle\Model\TemplateManagerInterface|\PHPUnit_Framework_MockObject_MockObject */
-    protected $templateManagerMock;
+    private $templateManagerMock;
 
     /**
      * {@inheritdooc}
@@ -50,10 +50,6 @@ class CKEditorTypeTest extends \PHPUnit_Framework_TestCase
         $this->templateManagerMock = $this->getMock('Ivory\CKEditorBundle\Model\TemplateManagerInterface');
 
         $this->ckEditorType = new CKEditorType(
-            true,
-            true,
-            'bundles/ckeditor/',
-            'bundles/ckeditor/ckeditor.js',
             $this->configManagerMock,
             $this->pluginManagerMock,
             $this->stylesSetManagerMock,
@@ -82,12 +78,54 @@ class CKEditorTypeTest extends \PHPUnit_Framework_TestCase
     {
         $this->assertTrue($this->ckEditorType->isEnable());
         $this->assertTrue($this->ckEditorType->isAutoload());
-        $this->assertSame('bundles/ckeditor/', $this->ckEditorType->getBasePath());
-        $this->assertSame('bundles/ckeditor/ckeditor.js', $this->ckEditorType->getJsPath());
+        $this->assertFalse($this->ckEditorType->isInline());
+        $this->assertFalse($this->ckEditorType->useJquery());
+        $this->assertFalse($this->ckEditorType->isInputSync());
+        $this->assertSame('bundles/ivoryckeditor/', $this->ckEditorType->getBasePath());
+        $this->assertSame('bundles/ivoryckeditor/ckeditor.js', $this->ckEditorType->getJsPath());
+        $this->assertSame('bundles/ivoryckeditor/adapters/jquery.js', $this->ckEditorType->getJqueryPath());
         $this->assertSame($this->configManagerMock, $this->ckEditorType->getConfigManager());
         $this->assertSame($this->pluginManagerMock, $this->ckEditorType->getPluginManager());
         $this->assertSame($this->stylesSetManagerMock, $this->ckEditorType->getStylesSetManager());
         $this->assertSame($this->templateManagerMock, $this->ckEditorType->getTemplateManager());
+    }
+
+    public function testEnableWithDefaultValue()
+    {
+        $form = $this->factory->create('ckeditor');
+        $view = $form->createView();
+
+        $this->assertArrayHasKey('enable', $view->vars);
+        $this->assertTrue($view->vars['enable']);
+    }
+
+    public function testEnableWithConfiguredValue()
+    {
+        $this->ckEditorType->isEnable(false);
+
+        $form = $this->factory->create('ckeditor');
+        $view = $form->createView();
+
+        $this->assertArrayHasKey('enable', $view->vars);
+        $this->assertFalse($view->vars['enable']);
+    }
+
+    public function testEnableWithExplicitValue()
+    {
+        $form = $this->factory->create('ckeditor', null, array('enable' => false));
+        $view = $form->createView();
+
+        $this->assertArrayHasKey('enable', $view->vars);
+        $this->assertFalse($view->vars['enable']);
+    }
+
+    public function testAutoloadWithDefaultValue()
+    {
+        $form = $this->factory->create('ckeditor');
+        $view = $form->createView();
+
+        $this->assertArrayHasKey('autoload', $view->vars);
+        $this->assertTrue($view->vars['autoload']);
     }
 
     public function testAutoloadWithConfiguredValue()
@@ -101,33 +139,137 @@ class CKEditorTypeTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($view->vars['autoload']);
     }
 
-    public function testEnableWithConfiguredAndExplicitValue()
+    public function testAutoloadWithExplicitValue()
     {
-        $form = $this->factory->create('ckeditor', null, array('enable' => false));
+        $form = $this->factory->create('ckeditor', null, array('autoload' => false));
         $view = $form->createView();
 
-        $this->assertArrayHasKey('enable', $view->vars);
-        $this->assertFalse($view->vars['enable']);
+        $this->assertArrayHasKey('autoload', $view->vars);
+        $this->assertFalse($view->vars['autoload']);
     }
 
-    public function testBaseAndJsPathWithConfiguredValues()
+    public function testInlineWithDefaultValue()
+    {
+        $form = $this->factory->create('ckeditor');
+        $view = $form->createView();
+
+        $this->assertArrayHasKey('inline', $view->vars);
+        $this->assertFalse($view->vars['inline']);
+    }
+
+    public function testInlineWithConfiguredValue()
+    {
+        $this->ckEditorType->isInline(true);
+
+        $form = $this->factory->create('ckeditor');
+        $view = $form->createView();
+
+        $this->assertArrayHasKey('inline', $view->vars);
+        $this->assertTrue($view->vars['inline']);
+    }
+
+    public function testInlineWithExplicitValue()
+    {
+        $form = $this->factory->create('ckeditor', null, array('inline' => true));
+        $view = $form->createView();
+
+        $this->assertArrayHasKey('inline', $view->vars);
+        $this->assertTrue($view->vars['inline']);
+    }
+
+    public function testJqueryWithDefaultValue()
+    {
+        $form = $this->factory->create('ckeditor');
+        $view = $form->createView();
+
+        $this->assertArrayHasKey('jquery', $view->vars);
+        $this->assertFalse($view->vars['jquery']);
+    }
+
+    public function testJqueryWithConfiguredValue()
+    {
+        $this->ckEditorType->useJquery(true);
+
+        $form = $this->factory->create('ckeditor');
+        $view = $form->createView();
+
+        $this->assertArrayHasKey('jquery', $view->vars);
+        $this->assertTrue($view->vars['jquery']);
+    }
+
+    public function testJqueryWithExplicitValue()
+    {
+        $form = $this->factory->create('ckeditor', null, array('jquery' => true));
+        $view = $form->createView();
+
+        $this->assertArrayHasKey('jquery', $view->vars);
+        $this->assertTrue($view->vars['jquery']);
+    }
+
+    public function testInputSyncWithDefaultValue()
+    {
+        $form = $this->factory->create('ckeditor');
+        $view = $form->createView();
+
+        $this->assertArrayHasKey('input_sync', $view->vars);
+        $this->assertFalse($view->vars['input_sync']);
+    }
+
+    public function testInputSyncWithConfiguredValue()
+    {
+        $this->ckEditorType->isInputSync(true);
+
+        $form = $this->factory->create('ckeditor');
+        $view = $form->createView();
+
+        $this->assertArrayHasKey('input_sync', $view->vars);
+        $this->assertTrue($view->vars['input_sync']);
+    }
+
+    public function testInputSyncWithExplicitValue()
+    {
+        $form = $this->factory->create('ckeditor', null, array('input_sync' => true));
+        $view = $form->createView();
+
+        $this->assertArrayHasKey('input_sync', $view->vars);
+        $this->assertTrue($view->vars['input_sync']);
+    }
+
+    public function testBaseAndJsPathWithDefaultValues()
     {
         $form = $this->factory->create('ckeditor');
         $view = $form->createView();
 
         $this->assertArrayHasKey('base_path', $view->vars);
-        $this->assertSame('bundles/ckeditor/', $view->vars['base_path']);
+        $this->assertSame('bundles/ivoryckeditor/', $view->vars['base_path']);
 
         $this->assertArrayHasKey('js_path', $view->vars);
-        $this->assertSame('bundles/ckeditor/ckeditor.js', $view->vars['js_path']);
+        $this->assertSame('bundles/ivoryckeditor/ckeditor.js', $view->vars['js_path']);
     }
 
-    public function testBaseAndJsPathWithConfiguredAndExplicitValues()
+    public function testBaseAndJsPathWithConfiguredValues()
+    {
+        $this->ckEditorType->setBasePath('foo/base/');
+        $this->ckEditorType->setJsPath('foo/ckeditor.js');
+        $form = $this->factory->create('ckeditor');
+        $view = $form->createView();
+
+        $this->assertArrayHasKey('base_path', $view->vars);
+        $this->assertSame('foo/base/', $view->vars['base_path']);
+
+        $this->assertArrayHasKey('js_path', $view->vars);
+        $this->assertSame('foo/ckeditor.js', $view->vars['js_path']);
+    }
+
+    public function testBaseAndJsPathWithExplicitValues()
     {
         $form = $this->factory->create(
             'ckeditor',
             null,
-            array('base_path' => 'foo/', 'js_path' => 'foo/ckeditor.js')
+            array(
+                'base_path' => 'foo/',
+                'js_path'   => 'foo/ckeditor.js',
+            )
         );
 
         $view = $form->createView();
@@ -137,6 +279,34 @@ class CKEditorTypeTest extends \PHPUnit_Framework_TestCase
 
         $this->assertArrayHasKey('js_path', $view->vars);
         $this->assertSame('foo/ckeditor.js', $view->vars['js_path']);
+    }
+
+    public function testJqueryPathWithDefaultValue()
+    {
+        $form = $this->factory->create('ckeditor');
+        $view = $form->createView();
+
+        $this->assertArrayHasKey('jquery_path', $view->vars);
+        $this->assertSame('bundles/ivoryckeditor/adapters/jquery.js', $view->vars['jquery_path']);
+    }
+
+    public function testJqueryPathWithConfiguredValue()
+    {
+        $this->ckEditorType->setJqueryPath('foo/jquery.js');
+        $form = $this->factory->create('ckeditor');
+        $view = $form->createView();
+
+        $this->assertArrayHasKey('jquery_path', $view->vars);
+        $this->assertSame('foo/jquery.js', $view->vars['jquery_path']);
+    }
+
+    public function testJqueryPathWithExplicitValue()
+    {
+        $form = $this->factory->create('ckeditor', null, array('jquery_path' => 'foo/jquery.js'));
+        $view = $form->createView();
+
+        $this->assertArrayHasKey('jquery_path', $view->vars);
+        $this->assertSame('foo/jquery.js', $view->vars['jquery_path']);
     }
 
     public function testDefaultConfig()
@@ -453,7 +623,7 @@ class CKEditorTypeTest extends \PHPUnit_Framework_TestCase
                     array(
                         'title' => 'My Template',
                         'html'  => '<h1>Template</h1><p>Type your text here.</p>',
-                    )
+                    ),
                 ),
             ),
         );
@@ -520,7 +690,7 @@ class CKEditorTypeTest extends \PHPUnit_Framework_TestCase
                     array(
                         'title' => 'My Extra Template',
                         'html'  => '<h2>Template</h2><p>Type your text here.</p>',
-                    )
+                    ),
                 ),
             ),
         );

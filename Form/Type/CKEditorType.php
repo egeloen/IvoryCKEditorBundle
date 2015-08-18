@@ -19,7 +19,9 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\Form\FormInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\OptionsResolver\OptionsResolverInterface;
+use Symfony\Component\HttpKernel\Kernel;
 
 /**
  * CKEditor type.
@@ -29,55 +31,55 @@ use Symfony\Component\OptionsResolver\OptionsResolverInterface;
 class CKEditorType extends AbstractType
 {
     /** @var boolean */
-    protected $enable;
+    private $enable = true;
 
     /** @var boolean */
-    protected $autoload;
+    private $autoload = true;
+
+    /** @var boolean */
+    private $inline = false;
+
+    /** @var boolean */
+    private $jquery = false;
+
+    /** @var boolean */
+    private $inputSync = false;
 
     /** @var string */
-    protected $basePath;
+    private $basePath = 'bundles/ivoryckeditor/';
 
     /** @var string */
-    protected $jsPath;
+    private $jsPath = 'bundles/ivoryckeditor/ckeditor.js';
+
+    /** @var string */
+    private $jqueryPath = 'bundles/ivoryckeditor/adapters/jquery.js';
 
     /** @var \Ivory\CKEditorBundle\Model\ConfigManagerInterface */
-    protected $configManager;
+    private $configManager;
 
     /** @var \Ivory\CKEditorBundle\Model\PluginManagerInterface */
-    protected $pluginManager;
+    private $pluginManager;
 
     /** @var \Ivory\CKEditorBundle\Model\StylesSetManagerInterface */
-    protected $stylesSetManager;
+    private $stylesSetManager;
 
-    /** @var \Ivory\CKEditorBundle\Model\TemplateManager*/
-    protected $templateManager;
+    /** @var \Ivory\CKEditorBundle\Model\TemplateManagerInterface */
+    private $templateManager;
 
     /**
      * Creates a CKEditor type.
      *
-     * @param boolean                                               $enable           The enable flag.
-     * @param boolean                                               $autoload         The autoload flag.
-     * @param string                                                $basePath         The CKEditor base path.
-     * @param string                                                $jsPath           The CKEditor JS path.
      * @param \Ivory\CKEditorBundle\Model\ConfigManagerInterface    $configManager    The config manager.
      * @param \Ivory\CKEditorBundle\Model\PluginManagerInterface    $pluginManager    The plugin manager.
      * @param \Ivory\CKEditorBundle\Model\StylesSetManagerInterface $stylesSetManager The styles set manager.
      * @param \Ivory\CKEditorBundle\Model\TemplateManagerInterface  $templateManager  The template manager.
      */
     public function __construct(
-        $enable,
-        $autoload,
-        $basePath,
-        $jsPath,
         ConfigManagerInterface $configManager,
         PluginManagerInterface $pluginManager,
         StylesSetManagerInterface $stylesSetManager,
         TemplateManagerInterface $templateManager
     ) {
-        $this->isEnable($enable);
-        $this->isAutoload($autoload);
-        $this->setBasePath($basePath);
-        $this->setJsPath($jsPath);
         $this->setConfigManager($configManager);
         $this->setPluginManager($pluginManager);
         $this->setStylesSetManager($stylesSetManager);
@@ -114,6 +116,54 @@ class CKEditorType extends AbstractType
         }
 
         return $this->autoload;
+    }
+
+    /**
+     * Sets/Checks if the widget is inlined.
+     *
+     * @param boolean $inline TRUE if the widget is inlined else FALSE.
+     *
+     * @return boolean TRUE if the widget is inlined else FALSE.
+     */
+    public function isInline($inline = null)
+    {
+        if ($inline !== null) {
+            $this->inline = (bool) $inline;
+        }
+
+        return $this->inline;
+    }
+
+    /**
+     * Checks/Sets if the jquery adapter is loaded.
+     *
+     * @param boolean $jquery TRUE if the jquery adapter is loaded else FALSE.
+     *
+     * @return boolean TRUE if the jquery adapter is loaded else FALSE.
+     */
+    public function useJquery($jquery = null)
+    {
+        if ($jquery !== null) {
+            $this->jquery = (bool) $jquery;
+        }
+
+        return $this->jquery;
+    }
+
+    /**
+     * Sets/Checks if the input is synchonized with the widget.
+     *
+     * @param boolean $inputSync TRUE if the input is synchronized with the widget else FALSE.
+     *
+     * @return boolean TRUE if the input is synchronized with the widget else FALSE.
+     */
+    public function isInputSync($inputSync = null)
+    {
+        if ($inputSync !== null) {
+            $this->inputSync = (bool) $inputSync;
+        }
+
+        return $this->inputSync;
     }
 
     /**
@@ -154,6 +204,26 @@ class CKEditorType extends AbstractType
     public function setJsPath($jsPath)
     {
         $this->jsPath = $jsPath;
+    }
+
+    /**
+     * Gets the jquery path.
+     *
+     * @return string The jquery path.
+     */
+    public function getJqueryPath()
+    {
+        return $this->jqueryPath;
+    }
+
+    /**
+     * Sets the jquery path.
+     *
+     * @param string $jqueryPath The jquery path.
+     */
+    public function setJqueryPath($jqueryPath)
+    {
+        $this->jqueryPath = $jqueryPath;
     }
 
     /**
@@ -245,8 +315,12 @@ class CKEditorType extends AbstractType
 
         if ($builder->getAttribute('enable')) {
             $builder->setAttribute('autoload', $options['autoload']);
+            $builder->setAttribute('inline', $options['inline']);
+            $builder->setAttribute('jquery', $options['jquery']);
+            $builder->setAttribute('input_sync', $options['input_sync']);
             $builder->setAttribute('base_path', $options['base_path']);
             $builder->setAttribute('js_path', $options['js_path']);
+            $builder->setAttribute('jquery_path', $options['jquery_path']);
 
             $config = $options['config'];
             if ($options['config_name'] === null) {
@@ -278,8 +352,12 @@ class CKEditorType extends AbstractType
 
         if ($form->getConfig()->getAttribute('enable')) {
             $view->vars['autoload'] = $form->getConfig()->getAttribute('autoload');
+            $view->vars['inline'] = $form->getConfig()->getAttribute('inline');
+            $view->vars['jquery'] = $form->getConfig()->getAttribute('jquery');
+            $view->vars['input_sync'] = $form->getConfig()->getAttribute('input_sync');
             $view->vars['base_path'] = $form->getConfig()->getAttribute('base_path');
             $view->vars['js_path'] = $form->getConfig()->getAttribute('js_path');
+            $view->vars['jquery_path'] = $form->getConfig()->getAttribute('jquery_path');
             $view->vars['config'] = $form->getConfig()->getAttribute('config');
             $view->vars['plugins'] = $form->getConfig()->getAttribute('plugins');
             $view->vars['styles'] = $form->getConfig()->getAttribute('styles');
@@ -290,31 +368,57 @@ class CKEditorType extends AbstractType
     /**
      * {@inheritdoc}
      */
-    public function setDefaultOptions(OptionsResolverInterface $resolver)
+    public function configureOptions(OptionsResolver $resolver)
     {
         $resolver
             ->setDefaults(array(
                 'enable'      => $this->enable,
                 'autoload'    => $this->autoload,
+                'inline'      => $this->inline,
+                'jquery'      => $this->jquery,
+                'input_sync'  => $this->inputSync,
                 'base_path'   => $this->basePath,
                 'js_path'     => $this->jsPath,
+                'jquery_path' => $this->jqueryPath,
                 'config_name' => $this->configManager->getDefaultConfig(),
                 'config'      => array(),
                 'plugins'     => array(),
                 'styles'      => array(),
                 'templates'   => array(),
             ))
-            ->addAllowedTypes(array(
-                'enable'      => 'bool',
-                'autoload'    => 'bool',
-                'config_name' => array('string', 'null'),
-                'base_path'   => array('string'),
-                'js_path'     => array('string'),
-                'config'      => 'array',
-                'plugins'     => 'array',
-                'styles'      => 'array',
-                'templates'   => 'array',
-            ));
+        ;
+
+        $allowedTypesMap = array(
+            'enable'      => 'bool',
+            'autoload'    => 'bool',
+            'inline'      => 'bool',
+            'jquery'      => 'bool',
+            'input_sync'  => 'bool',
+            'config_name' => array('string', 'null'),
+            'base_path'   => 'string',
+            'js_path'     => 'string',
+            'jquery_path' => 'string',
+            'config'      => 'array',
+            'plugins'     => 'array',
+            'styles'      => 'array',
+            'templates'   => 'array',
+        );
+
+        if (Kernel::VERSION_ID >= 20600) {
+            foreach ($allowedTypesMap as $option => $allowedTypes) {
+                $resolver->addAllowedTypes($option, $allowedTypes);
+            }
+        } else {
+            $resolver->addAllowedTypes($allowedTypesMap);
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function setDefaultOptions(OptionsResolverInterface $resolver)
+    {
+        $this->configureOptions($resolver);
     }
 
     /**

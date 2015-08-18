@@ -11,7 +11,6 @@
 
 namespace Ivory\CKEditorBundle\Tests\Template;
 
-use Ivory\CKEditorBundle\Templating\CKEditorHelper;
 use Ivory\CKEditorBundle\Twig\CKEditorExtension;
 
 /**
@@ -22,10 +21,10 @@ use Ivory\CKEditorBundle\Twig\CKEditorExtension;
 class TwigTemplateTest extends AbstractTemplateTest
 {
     /** @var \Twig_Environment */
-    protected $twig;
+    private $twig;
 
     /** @var \Twig_Template */
-    protected $template;
+    private $template;
 
     /**
      * {@inheritdoc}
