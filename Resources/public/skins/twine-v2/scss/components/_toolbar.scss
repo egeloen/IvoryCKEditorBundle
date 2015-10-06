@@ -98,7 +98,7 @@ a.cke_button {
     cursor: default;
     float: left;
     border: 0;
-    border-radius: 2px;
+    border-radius: $border-radius;
     transition: background-color .2s ease-in-out;
 }
 
