@@ -51,6 +51,7 @@ Special outer level classes used in this file:
     display: block;
     border: 2px solid $hr-border;
     border-radius: $border-radius;
+    background-color: $toolbar-bg;
 }
 
 /* The inner boundary of the interface. */
@@ -92,7 +93,6 @@ Special outer level classes used in this file:
 
 .cke_top {
     padding: 3px 6px;
-    background-color: $toolbar-bg;
     /* Allow breaking toolbars when in a narrow editor. (#9947) */
     white-space: normal;
 }
