@@ -1,4 +1,4 @@
-BootstrapCK Skin
+Twine-v2 (extends BootstrapCK skin)
 ====================
 
 The BootstrapCK-Skin is a skin for [CKEditor4](http://ckeditor.com/) based on [Twitter Bootstrap3](http://getbootstrap.com/) styles.
