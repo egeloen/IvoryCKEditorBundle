@@ -99,6 +99,7 @@ Special outer level classes used in this file:
 
 .cke_contents, .cke_editable {
     background-color: $grey-lighter;
+    .tab & { background-color: $white; }
 }
 
 .cke_contents {
