@@ -46,9 +46,12 @@ matrix:
           env: SYMFONY_VERSION=2.7.*
         - php: 5.6
           env: SYMFONY_VERSION=2.8.*@dev
+        - php: 5.6
+          env: SYMFONY_VERSION=3.0.*@dev
     allow_failures:
         - php: 7.0
         - env: SYMFONY_VERSION=2.8.*@dev
+        - env: SYMFONY_VERSION=3.0.*@dev
 
 notifications:
     email: geloen.eric@gmail.com
