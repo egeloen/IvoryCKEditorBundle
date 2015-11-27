@@ -452,6 +452,10 @@ class CKEditorType extends AbstractType
      */
     public function getParent()
     {
+        if (Kernel::VERSION_ID >= 20800) {
+            return 'Symfony\Component\Form\Extension\Core\Type\TextAreaType';
+        }
+
         return 'textarea';
     }
 
