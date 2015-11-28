@@ -25,7 +25,7 @@
         "twig/twig": "~1.12"
     },
     "suggest": {
-        "twig/twig": "Allows to use twig templates"
+        "twig/twig": "Allows to use Twig templates"
     },
     "autoload": {
         "psr-4": { "Ivory\\CKEditorBundle\\": "" }
