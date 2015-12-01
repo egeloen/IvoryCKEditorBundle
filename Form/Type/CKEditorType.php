@@ -452,10 +452,12 @@ class CKEditorType extends AbstractType
      */
     public function getParent()
     {
-        if (Kernel::VERSION_ID >= 20800) {
+        // Prefer the FQCN if the getBlockPrefix method exists on the parent method
+        if (method_exists('Symfony\Component\Form\AbstractType', 'getBlockPrefix')) {
             return 'Symfony\Component\Form\Extension\Core\Type\TextareaType';
         }
 
+        // Return the legacy shortname; drop this when Symfony <2.8 support is removed
         return 'textarea';
     }
 

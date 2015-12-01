@@ -13,7 +13,6 @@ namespace Ivory\CKEditorBundle\Tests\Form\Type;
 
 use Ivory\CKEditorBundle\Form\Type\CKEditorType;
 use Symfony\Component\Form\Forms;
-use Symfony\Component\HttpKernel\Kernel;
 
 /**
  * CKEditor type test.
@@ -65,7 +64,8 @@ class CKEditorTypeTest extends \PHPUnit_Framework_TestCase
             ->getFormFactory();
 
         // The form type requires a FQCN in Symfony 3.0 (feature added in Symfony 2.8)
-        $this->formType = Kernel::VERSION_ID >= 20800 ? 'Ivory\CKEditorBundle\Form\Type\CKEditorType' : 'ckeditor';
+        $preferFQCN = method_exists('Symfony\Component\Form\AbstractType', 'getBlockPrefix');
+        $this->formType = $preferFQCN ? 'Ivory\CKEditorBundle\Form\Type\CKEditorType' : 'ckeditor';
     }
 
     /**
