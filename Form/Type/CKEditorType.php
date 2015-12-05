@@ -452,13 +452,21 @@ class CKEditorType extends AbstractType
      */
     public function getParent()
     {
-        return 'textarea';
+        return 'Symfony\Component\Form\Extension\Core\Type\TextareaType';
     }
 
     /**
      * {@inheritdoc}
      */
     public function getName()
+    {
+        return $this->getBlockPrefix();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getBlockPrefix()
     {
         return 'ckeditor';
     }
