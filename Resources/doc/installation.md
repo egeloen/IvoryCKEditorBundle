@@ -23,5 +23,5 @@ public function registerBundles()
 Install the bundle:
 
 ```
-$ composer update egeloen/ckeditor-bundle
+$ composer require egeloen/ckeditor-bundle
 ```
