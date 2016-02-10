@@ -9,5 +9,6 @@ CKEDITOR.editorConfig = function( config ) {
     config.skin = 'twine-v2';
     config.removePlugins = 'elementspath, resize';
     config.resize_enabled = false;
+    config.forcePasteAsPlainText = true;
 	// config.uiColor = '#AADC6E';
 };
