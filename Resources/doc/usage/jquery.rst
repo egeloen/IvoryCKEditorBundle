@@ -1,0 +1,46 @@
+jQuery adapter
+==============
+
+If your application relies on jQuery, we recommend you to use the jQuery adapter. The bundle will automatically wrap
+the CKEditor instantiation into a ``jQuery(document).ready()`` block making the code more reliable.
+
+Enable the Adapter
+------------------
+
+The CKEditor jQuery adapter is by default not loaded even if the ``autoload`` option is enabled. In order to load it,
+the ``autoload`` flag must be enabled and you must explicitly enable the jquery adapter. You can do it your
+configuration or in your widget:
+
+.. configuration-block::
+
+    .. code-block:: yaml
+
+        # app/config/config.yml
+        ivory_ck_editor:
+            jquery: true
+
+    .. code-block:: php
+
+        $builder->add('field', 'ckeditor', array('jquery' => true));
+
+Use your Adapter
+----------------
+
+Additionally, the jQuery adapter used by default is the [one](/Resources/public/adapters/jquery.js) shipped with the
+bundle. If you want to use your own, you can configure it in your configuration or in your widget:
+
+.. configuration-block::
+
+    .. code-block:: yaml
+
+        # app/config/config.yml
+        ivory_ck_editor:
+            jquery_path: your/own/jquery.js
+
+    .. code-block:: php
+
+        $builder->add('field', 'ckeditor', array('jquery_path' => 'your/own/jquery.js'));
+
+.. note::
+
+    Each path must be relative to the web directory.
