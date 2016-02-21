@@ -1,9 +1,10 @@
 Disable auto inline
 ===================
 
-By default, CKEditor enables the auto inline feature meaning that any ``contenteditable`` attribute sets to ``true``
-will be converted to CKEditor instance automatically. If you want to disable it, you can do it in your configuration or
-in your widget:
+By default, CKEditor enables the auto inline feature meaning that any
+``contenteditable`` attribute sets to ``true`` will be converted to CKEditor
+instance automatically. If you want to disable it, you can do it in your
+configuration or in your widget:
 
 .. configuration-block::
 
@@ -19,4 +20,5 @@ in your widget:
 
 .. note::
 
-    This option will only disable the CKEditor auto inline feature not the browser one if it supports it.
+    This option will only disable the CKEditor auto inline feature not the
+    browser one if it supports it.

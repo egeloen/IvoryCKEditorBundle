@@ -33,7 +33,8 @@ Then, update your ``app/AppKernel.php``:
 Install the Assets
 ------------------
 
-Once, you have registered the bundle, you need to install the assets in the web directory:
+Once, you have registered the bundle, you need to install the assets in the web
+directory:
 
 .. code-block:: bash
 

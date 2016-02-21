@@ -4,15 +4,18 @@ Skin support
 Install your Skin
 -----------------
 
-First of all, you need to download & extract your skin in the web directory. For that, you have 2 possibilities:
+First of all, you need to download and extract your skin in the web directory.
+For that, you have two possibilities:
 
-  - Directly put it in the web directory (``/web/ckeditor/`` for example).
-  - Put it in the ``/Resources/public/`` directory of any of your bundles and install the assets.
+#. Directly put it in the web directory (``/web/ckeditor/`` for example).
+#. Put it in the ``/Resources/public/`` directory of any of your bundles and
+   install the assets.
 
 Register your Skin
 ------------------
 
-Then, to use your skin, just need to register it in your configuration or in your widget:
+Then, to use your skin, just need to register it in your configuration or in
+your widget:
 
 .. configuration-block::
 

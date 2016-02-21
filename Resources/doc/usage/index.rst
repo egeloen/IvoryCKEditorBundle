@@ -1,7 +1,8 @@
 Usage
 =====
 
-If you ever wonder something about this bundle, you are at the good place. Here, you can find all bundle features:
+If you ever wondered something about this bundle, you are at the good place.
+Here, you can find all bundle features:
 
 .. toctree::
     :hidden:

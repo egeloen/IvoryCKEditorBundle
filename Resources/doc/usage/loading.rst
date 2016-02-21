@@ -1,10 +1,11 @@
 Load manually CKEditor
 ======================
 
-By default, all fields loads the CKEditor library. It means if you have multiple CKEditor fields, there will be
-multiple CKEditor library loading (as much as you have fields). If you want to control it, you can configure the
-bundle to not load the library at all and let you the control of it. To disable the CKEditor library loading, you can
-do it in your configuration or in your widget:
+By default, all fields loads the CKEditor library. It means if you have multiple
+CKEditor fields, there will be multiple CKEditor library loading (as much as you
+have fields). If you want to control it, you can configure the bundle to not
+load the library at all and let you the control of it. To disable the CKEditor
+library loading, you can do it in your configuration or in your widget:
 
 .. configuration-block::
 
@@ -20,5 +21,5 @@ do it in your configuration or in your widget:
 
 .. note::
 
-    CKEditor must be loaded before any fields have been rendered, so we recommend you to register it in the ``head``
-    of your page.
+    CKEditor must be loaded before any fields have been rendered, so we
+    recommend you to register it in the ``head`` of your page.

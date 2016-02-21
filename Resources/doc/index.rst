@@ -10,13 +10,12 @@ Getting started with IvoryCKEditorBundle
 Overview
 --------
 
-The bundle integrates `CKEditor`_ into `Symfony`_ via the `Form Component`_. It automatically registers a new type
-called ``ckeditor`` which can be easily as well as highly configured. This type extends the `textarea`_ one, meaning
-all textarea options are available.
+The bundle integrates `CKEditor`_ into `Symfony`_ via the `Form Component`_. It
+automatically registers a new type called ``ckeditor`` which can be easily as
+well as highly configured. This type extends the `textarea`_ one, meaning all
+textarea options are available.
 
-Here, an example where we customize the `CKEditor config`_:
-
-.. code-block:: php
+Here, an example where we customize the `CKEditor config`_::
 
     $builder->add('field', 'ckeditor', array(
         'config' => array(
@@ -27,15 +26,17 @@ Here, an example where we customize the `CKEditor config`_:
 
 .. note::
 
-    As of Symfony 2.8, the second argument of ``$builder->add()`` accepts the fully qualified class name of the
-    form type and it becomes mandatory to use it in Symfony 3.0. Depending on your Symfony versions, you should replace
-    the ``ckeditor`` parameter by ``Ivory\CKEditorBundle\Form\Type\CKEditorType`` or by ``CKEditorType::class`` if your
-    project relies on PHP 5.5+.
+    As of Symfony 2.8, the second argument of ``$builder->add()`` accepts the
+    fully qualified class name of the form type and it becomes mandatory to use
+    it in Symfony 3.0. Depending on your Symfony versions, you should replace
+    the ``ckeditor`` parameter by
+    ``Ivory\CKEditorBundle\Form\Type\CKEditorType`` or by
+    ``CKEditorType::class`` if your project relies on PHP 5.5+.
 
 Installation
 ------------
 
-To install the bundle, please, read the :doc:`Installation documentation<installation>`.
+To install the bundle, please, read the :doc:`Installation documentation <installation>`.
 
 Usage
 -----

@@ -1,8 +1,10 @@
 Use inline editing
 ==================
 
-By default, the bundle uses a `Classic Editing`_ which relies on ``CKEDITOR.replace``. If you want to use the
-`Inline Editing`_ which relies on ``CKEDITOR.inline``, you can configure it in your configuration or in your widget:
+By default, the bundle uses a `Classic Editing`_ which relies on
+``CKEDITOR.replace``. If you want to use the `Inline Editing`_ which relies on
+``CKEDITOR.inline``, you can configure it in your configuration or in your
+widget:
 
 .. configuration-block::
 

@@ -1,9 +1,10 @@
 Template support
 ================
 
-The bundle offers you the ability to manage extra templates. To use this feature, you need to enable the ``templates``
-plugins shipped with the bundle and configure your templates. Like plugins, you can define them in your configuration
-or in your widget:
+The bundle offers you the ability to manage extra templates. To use this
+feature, you need to enable the ``templates`` plugins shipped with the bundle
+and configure your templates. Like plugins, you can define them in your
+configuration or in your widget:
 
 .. configuration-block::
 

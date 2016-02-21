@@ -1,7 +1,8 @@
 Style support
 =============
 
-The bundle allows you to define your own styles. Like plugins, you can define them in your configuration or your widget:
+The bundle allows you to define your own styles. Like plugins, you can define
+them in your configuration or your widget:
 
 .. configuration-block::
 
