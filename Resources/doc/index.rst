@@ -19,7 +19,7 @@ Here, an example where we customize the `CKEditor config`_:
 
 .. code-block:: php
 
-    // Symfony 2.8 and previous versions
+    // Symfony 2.7, previous versions and Symfony 2.8 with PHP <5.5
     $builder->add('field', 'ckeditor', array(
         'config' => array(
             'uiColor' => '#ffffff',
@@ -27,7 +27,7 @@ Here, an example where we customize the `CKEditor config`_:
         ),
     ));
 
-    // Symfony 3.0 and newer versions
+    // Symfony 2.8 with PHP ^5.5 , Symfony 3.0 and newer versions
     use Ivory\CKEditorBundle\Form\Type\CKEditorType;
 
     $builder->add('field', CKEditorType::class, array(
