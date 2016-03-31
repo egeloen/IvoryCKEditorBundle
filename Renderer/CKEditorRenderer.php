@@ -13,6 +13,7 @@ namespace Ivory\CKEditorBundle\Renderer;
 
 use Ivory\JsonBuilder\JsonBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 /**
  * @author GeLo <geloen.eric@gmail.com>
@@ -212,7 +213,7 @@ class CKEditorRenderer implements CKEditorRendererInterface
                 $config[$url] = $this->getRouter()->generate(
                     $config[$route],
                     isset($config[$routeParameters]) ? $config[$routeParameters] : array(),
-                    isset($config[$routeAbsolute]) ? $config[$routeAbsolute] : false
+                    isset($config[$routeAbsolute]) ? $config[$routeAbsolute] : UrlGeneratorInterface::ABSOLUTE_PATH
                 );
             }
 
