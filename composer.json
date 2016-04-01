@@ -13,7 +13,6 @@
     "require": {
         "php": ">=5.3.3",
         "egeloen/json-builder": "~1.0|~2.0",
-        "egeloen/form-extra-bundle": "~1.0.0",
         "symfony/dependency-injection": "~2.2|~3.0",
         "symfony/form": "~2.2|~3.0",
         "symfony/framework-bundle": "~2.2|~3.0"
