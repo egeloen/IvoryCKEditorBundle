@@ -38,4 +38,4 @@ directory:
 
 .. code-block:: bash
 
-    $ php app/console assets:install web
+    $ php bin/console assets:install web
