@@ -11,6 +11,9 @@
 
 namespace Ivory\CKEditorBundle\Tests\Template;
 
+use Ivory\CKEditorBundle\Templating\CKEditorHelper;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+
 /**
  * Abstract template test.
  *
@@ -18,37 +21,76 @@ namespace Ivory\CKEditorBundle\Tests\Template;
  */
 abstract class AbstractTemplateTest extends \PHPUnit_Framework_TestCase
 {
-    /**
-     * Renders a template.
-     *
-     * @param array $context The template context.
-     *
-     * @return string The template output.
-     */
-    abstract protected function renderTemplate(array $context = array());
+    /** @var \Ivory\CKEditorBundle\Templating\CKEditorHelper */
+    protected $helper;
+
+    /** @var \Symfony\Component\DependencyInjection\ContainerInterface|\PHPUnit_Framework_MockObject_MockObject */
+    protected $containerMock;
+
+    /** @var \Symfony\Component\Templating\Helper\CoreAssetsHelper|\PHPUnit_Framework_MockObject_MockObject */
+    protected $assetsHelperMock;
+
+    /** @var \Symfony\Component\Routing\RouterInterface|\PHPUnit_Framework_MockObject_MockObject */
+    protected $routerMock;
 
     /**
-     * Normalizes the output by removing the heading whitespaces.
-     *
-     * @param string $output The output.
-     *
-     * @return string The normalized output.
+     * {@inheritdoc}
      */
-    protected function normalizeOutput($output)
+    protected function setUp()
     {
-        return preg_replace('/^\s+/m', '', $output);
+        $this->routerMock = $this->getMock('Symfony\Component\Routing\RouterInterface');
+
+        $this->assetsHelperMock = $this->getMockBuilder('Symfony\Component\Templating\Helper\CoreAssetsHelper')
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $this->assetsHelperMock
+            ->expects($this->any())
+            ->method('getUrl')
+            ->will($this->returnArgument(0));
+
+        $this->containerMock = $this->getMock('Symfony\Component\DependencyInjection\ContainerInterface');
+        $this->containerMock
+            ->expects($this->any())
+            ->method('get')
+            ->will($this->returnValueMap(array(
+                array(
+                    'templating.helper.assets',
+                    ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE,
+                    $this->assetsHelperMock,
+                ),
+                array(
+                    'router',
+                    ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE,
+                    $this->routerMock
+                ),
+            )));
+
+        $this->helper = new CKEditorHelper($this->containerMock);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function tearDown()
+    {
+        unset($this->routerMock);
+        unset($this->assetsHelperMock);
+        unset($this->containerMock);
+        unset($this->helper);
     }
 
     public function testRenderWithSimpleWidget()
     {
         $output = $this->renderTemplate(
             array(
+                'form'      => $this->getMock('Symfony\Component\Form\FormView'),
                 'id'        => 'id',
                 'value'     => '<p>value</p>',
                 'enable'    => true,
                 'base_path' => 'base_path',
                 'js_path'   => 'js_path',
-                'config'    => json_encode(array()),
+                'config'    => array(),
                 'plugins'   => array(),
                 'styles'    => array(),
                 'templates' => array(),
@@ -58,31 +100,32 @@ abstract class AbstractTemplateTest extends \PHPUnit_Framework_TestCase
         $expected = <<<EOF
 <textarea >&lt;p&gt;value&lt;/p&gt;</textarea>
 <script type="text/javascript">
-var CKEDITOR_BASEPATH = 'base_path';
+var CKEDITOR_BASEPATH = "base_path";
 </script>
 <script type="text/javascript" src="js_path"></script>
 <script type="text/javascript">
-if (CKEDITOR.instances['id']) {
-delete CKEDITOR.instances['id'];
+if (CKEDITOR.instances["id"]) {
+delete CKEDITOR.instances["id"];
 }
-CKEDITOR.replace('id', []);
+CKEDITOR.replace("id", []);
 </script>
 
 EOF;
 
-        $this->assertSame($expected, $this->normalizeOutput($output));
+        $this->assertSame($this->normalizeOutput($expected), $this->normalizeOutput($output));
     }
 
     public function testRenderWithFullWidget()
     {
         $output = $this->renderTemplate(
             array(
+                'form'      => $this->getMock('Symfony\Component\Form\FormView'),
                 'id'        => 'id',
                 'value'     => '<p>value</p>',
                 'enable'    => true,
                 'base_path' => 'base_path',
                 'js_path'   => 'js_path',
-                'config'    => json_encode(array('foo' => 'bar')),
+                'config'    => array('foo' => 'bar'),
                 'plugins'   => array(
                     'foo' => array('path' => 'path', 'filename' => 'filename'),
                 ),
@@ -108,33 +151,93 @@ EOF;
         $expected = <<<EOF
 <textarea >&lt;p&gt;value&lt;/p&gt;</textarea>
 <script type="text/javascript">
-var CKEDITOR_BASEPATH = 'base_path';
+var CKEDITOR_BASEPATH = "base_path";
 </script>
 <script type="text/javascript" src="js_path"></script>
 <script type="text/javascript">
-if (CKEDITOR.instances['id']) {
-delete CKEDITOR.instances['id'];
+if (CKEDITOR.instances["id"]) {
+delete CKEDITOR.instances["id"];
 }
-CKEDITOR.plugins.addExternal('foo', 'path', 'filename');
-CKEDITOR.stylesSet.add('default', [{"name":"Blue Title","element":"h2","styles":{"color":"Blue"}}]);
-CKEDITOR.addTemplates('foo', {"imagesPath":"path","templates":[{"title":"My Template","html":"<h1>Template<\/h1>"}]});
-CKEDITOR.replace('id', {"foo":"bar"});
+CKEDITOR.plugins.addExternal("foo", "path", "filename");
+if (CKEDITOR.stylesSet.get("default") === null) { CKEDITOR.stylesSet.add("default", [{"name":"Blue Title","element":"h2","styles":{"color":"Blue"}}]); }
+CKEDITOR.addTemplates("foo", {"imagesPath":"path","templates":[{"title":"My Template","html":"<h1>Template<\/h1>"}]});
+CKEDITOR.replace("id", {"foo":"bar"});
 </script>
 
 EOF;
 
-        $this->assertSame($expected, $this->normalizeOutput($output));
+        $this->assertSame($this->normalizeOutput($expected), $this->normalizeOutput($output));
     }
 
     public function testRenderWithDisableWidget()
     {
-        $output = $this->renderTemplate(array('id' => 'id', 'value' => 'value', 'enable' => false));
+        $output = $this->renderTemplate(
+            array(
+                'form'   => $this->getMock('Symfony\Component\Form\FormView'),
+                'id'     => 'id',
+                'value'  => 'value',
+                'enable' => false,
+            )
+        );
 
         $expected = <<<EOF
 <textarea >value</textarea>
 
 EOF;
 
-        $this->assertSame($expected, $this->normalizeOutput($output));
+        $this->assertSame($this->normalizeOutput($expected), $this->normalizeOutput($output));
+    }
+
+    public function testRenderWithMultipleWidgets()
+    {
+        $context = array(
+            'form'      => $this->getMock('Symfony\Component\Form\FormView'),
+            'id'        => 'id',
+            'value'     => '<p>value</p>',
+            'enable'    => true,
+            'base_path' => 'base_path',
+            'js_path'   => 'js_path',
+            'config'    => array(),
+            'plugins'   => array(),
+            'styles'    => array(),
+            'templates' => array(),
+        );
+
+        $this->renderTemplate($context);
+        $output = $this->renderTemplate($context);
+
+        $expected = <<<EOF
+<textarea >&lt;p&gt;value&lt;/p&gt;</textarea>
+<script type="text/javascript">
+if (CKEDITOR.instances["id"]) {
+delete CKEDITOR.instances["id"];
+}
+CKEDITOR.replace("id", []);
+</script>
+
+EOF;
+
+        $this->assertSame($this->normalizeOutput($expected), $this->normalizeOutput($output));
+    }
+
+    /**
+     * Renders a template.
+     *
+     * @param array $context The template context.
+     *
+     * @return string The template output.
+     */
+    abstract protected function renderTemplate(array $context = array());
+
+    /**
+     * Normalizes the output by removing the heading whitespaces.
+     *
+     * @param string $output The output.
+     *
+     * @return string The normalized output.
+     */
+    protected function normalizeOutput($output)
+    {
+        return str_replace(PHP_EOL, '', str_replace(' ', '', $output));
     }
 }

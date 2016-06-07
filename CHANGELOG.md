@@ -1,5 +1,61 @@
 # CHANGELOG
 
+### 2.4.0 (????-??-??)
+
+ * b2d2abc - [README] Add versioneye badge
+ * 7bd8f86 - [Resources] Upgrade CKEditor to 4.4.2
+ * 5e8fc10 - [Templating] Move the CKEditorHelper class from the Helper to the Templating namespace
+ * cc711dd - [Helper] Merge the AssetsVersionTrimerHelper into the CKEditorHelper
+ * c24f3c4 - [README] Add packagist badges
+ * 843f88d - [Test] Fix PHP template engine setup for HHVM
+ * bdfa451 - [Travis] Increase build matrix
+ * 05f36a5 - [Composer] Bump PHP to 5.3.3 + Twig to 1.12 + PHPUnit to 4.0
+ * b3b7a23 - [Twig] Proxify helper calls on the extension
+ * cd4099b - [Travis][Composer] Remove --dev
+ * 1ca9425 - [Composer] Clean suggest section
+ * cb750c9 - [Composer] Upgrade to PSR-4
+
+### 2.3.2 (2014-06-17)
+
+ * 88b21ea - [Travis] Add Symfony 2.5 + Remove 2.0 branch
+ * 5793ab2 - [Helper] Fix test according to Symfony
+ * ea39ae1 - [DependencyInjection] Prepend resources instead of append them
+ * 7d6f016 - [Test] Move fixtures at the root test directory
+ * 805161b - [Model] Improve interface PHPDoc
+ * 8e1cb8d - [Test] Fix PHPDoc
+ * e5aeb4c - [README] Add Scrutunizer CI badge
+ * ccfd632 - [Helper] Refactor CKEditorHelper::renderReplace for better comprehension
+ * fb0c5e5 - Fix PHPDoc + CS
+ * 1ef08af - [DependencyInjection] Refactor extension for a better comprehension
+ * d8cef6f - [DependencyInjection] Split configuration
+ * 6c10e68 - [DependencyInjection] Rely on ConfigurableExtension
+
+### 2.3.1 (2014-05-26)
+
+ * 478c4ed - Fix CKEditor target branch
+ * b430689 - Upgrade CKEditor to 4.4.1
+
+### 2.3.0 (2014-05-16)
+
+ * 4fb29d1 - [Helper] Only load the CKEditor library one time
+ * 41636f9 - Add coveralls support
+ * 13e7038 - Allow RegExp by relying on egeloen/json-builder
+ * ac6db2a - Upgrade CKEditor to 4.4.0
+ * 648aa63 - [Helper] Only render StylesSet if they are not already registered
+
+### 2.2.1 (2014-01-31)
+
+ * aa81171 - [Travis] Make symfony/form dynamic
+ * e51427c - [Twig] Fix js escaping
+ * fa08cd3 - [Twig] Fix caching by lazy loading services scoped request
+
+### 2.2.0 (2014-01-30)
+
+ * db93af5 - [Model] Move all view logic to an helper
+ * ff12310 - Upgrade CKEditor to 4.3.2
+ * 2b1786a - Update new year
+ * cdad813 - Deprecate Symfony 2.0
+
 ### 1.1.9 - 2.1.9 (2014-01-04)
 
  * ebeb553 - [ConfigManager] Fix merge config behavior

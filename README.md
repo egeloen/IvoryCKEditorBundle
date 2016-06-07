@@ -1,7 +1,14 @@
 # README
 
-1.*: [![Build Status](https://secure.travis-ci.org/egeloen/IvoryCKEditorBundle.png?branch=2.0)](http://travis-ci.org/egeloen/IvoryCKEditorBundle)
-2.*: [![Build Status](https://secure.travis-ci.org/egeloen/IvoryCKEditorBundle.png?banch=master)](http://travis-ci.org/egeloen/IvoryCKEditorBundle)
+[![Build Status](https://secure.travis-ci.org/egeloen/IvoryCKEditorBundle.png)](http://travis-ci.org/egeloen/IvoryCKEditorBundle)
+[![Coverage Status](https://coveralls.io/repos/egeloen/IvoryCKEditorBundle/badge.png?branch=master)](https://coveralls.io/r/egeloen/IvoryCKEditorBundle?branch=master)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/egeloen/IvoryCKEditorBundle/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/egeloen/IvoryCKEditorBundle/?branch=master)
+[![Dependency Status](http://www.versioneye.com/php/egeloen:ckeditor-bundle/badge.svg)](http://www.versioneye.com/php/egeloen:ckeditor-bundle)
+
+[![Latest Stable Version](https://poser.pugx.org/egeloen/ckeditor-bundle/v/stable.svg)](https://packagist.org/packages/egeloen/ckeditor-bundle)
+[![Latest Unstable Version](https://poser.pugx.org/egeloen/ckeditor-bundle/v/unstable.svg)](https://packagist.org/packages/egeloen/ckeditor-bundle)
+[![Total Downloads](https://poser.pugx.org/egeloen/ckeditor-bundle/downloads.svg)](https://packagist.org/packages/egeloen/ckeditor-bundle)
+[![License](https://poser.pugx.org/egeloen/ckeditor-bundle/license.svg)](https://packagist.org/packages/egeloen/ckeditor-bundle)
 
 The bundle provides a [CKEditor](http://ckeditor.com/) integration for your Symfony2 Project. It automatically registers
 the new `ckeditor` form type which can be easily configured.
@@ -13,14 +20,9 @@ the new `ckeditor` form type which can be easily configured.
  3. [Configuration](http://github.com/egeloen/IvoryCKEditorBundle/blob/master/Resources/doc/configuration.md) (Optional)
  4. [File Browse/Upload](http://github.com/egeloen/IvoryCKEditorBundle/blob/master/Resources/doc/file_browse_upload.md) (Optional)
 
-The bundle is compatible with all Symfony2 versions. For BC reasons, you must use the 2.0 branch of the bundle for
-Symfony 2.0 (1.* version of the bundle) and the master branch for Symfony >= 2.1 (2.* version of the bundle).
-
 ## Contribute
 
 We love contributors! Ivory is an open source project. If you'd like to contribute, feel free to propose a PR!
-
-All contributions must be done on the 2.0 branch unless you have a good reason.
 
 ## License
 
