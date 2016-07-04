@@ -140,23 +140,23 @@ class CKEditorRenderer implements CKEditorRendererInterface
         }
         
         /**
-          Using Templating service to render a twig view;
-          Before in config.yml (or CkeditorType::class) set the parameter 'html' : '@MyBundle:Templates:myTemplate-1.html.twig'
-          Exemple :
-            ivory_ck_editor:
-                 configs:
-                    my_config:
-                    extraPlugins : "templates,htmlwriter"
-                 templates:    "my_templates"
-            templates:
-                my_templates:
-                     imagesPath: "/bundles/mybundle/templates/images"
-                     templates:
-                         -
-                            title:       "My Template"
-                            image:       "image.jpg"
-                            description: "My awesome template"
-                            html:        '@MyBundle:Templates:myTemplate-1.html.twig'
+         * Using Templating service to render a twig view;
+         * Before in config.yml (or CkeditorType::class) set the parameter 'html' : '@MyBundle:Templates:myTemplate-1.html.twig'
+         * Exemple :
+         *   ivory_ck_editor:
+         *        configs:
+         *           my_config:
+         *           extraPlugins : "templates,htmlwriter"
+         *        templates:    "my_templates"
+         *   templates:
+         *       my_templates:
+         *            imagesPath: "/bundles/mybundle/templates/images"
+         *            templates:
+         *                -
+         *                   title:       "My Template"
+         *                   image:       "image.jpg"
+         *                   description: "My awesome template"
+         *                   html:        '@MyBundle:Templates:myTemplate-1.html.twig'
          */
         foreach ($template['templates'] as $key => $view) {
             if (substr($view['html'], 0, 1) === '@') {
