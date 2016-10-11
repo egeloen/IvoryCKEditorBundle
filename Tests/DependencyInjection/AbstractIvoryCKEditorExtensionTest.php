@@ -353,6 +353,10 @@ abstract class AbstractIvoryCKEditorExtensionTest extends AbstractTestCase
                         'image'       => 'image.jpg',
                         'description' => 'My awesome description',
                         'html'        => '<h1>Template</h1><p>Type your text here.</p>',
+                        'template'    => 'AppBundle:CKEditor:template.html.twig',
+                        'template_parameters'   => array(
+                            'foo'   => 'bar'
+                        )
                     ),
                 ),
             ),
