@@ -1,15 +1,20 @@
 #!/usr/bin/env bash
 
+set -e
+
 SYMFONY_VERSION=${SYMFONY_VERSION-2.3.*}
 COMPOSER_PREFER_LOWEST=${COMPOSER_PREFER_LOWEST-false}
+DOCKER_BUILD=${DOCKER_BUILD=false}
 
-# Update Composer
+if [ ${DOCKER_BUILD} = true ]; then
+    docker-compose build
+    docker-compose run --rm php composer update --prefer-source
+
+    exit
+fi
+
 composer self-update
 
-# Always remove PHP-CS-Fixer (PHP >= 5.6)
-composer remove --no-update --dev friendsofphp/php-cs-fixer
-
-# Fix Symfony versions
 composer require --no-update symfony/framework-bundle:${SYMFONY_VERSION}
 composer require --no-update symfony/form:${SYMFONY_VERSION}
 composer require --no-update --dev symfony/templating:${SYMFONY_VERSION}
@@ -22,10 +27,10 @@ else
     composer require --no-update --dev symfony/asset:${SYMFONY_VERSION}
 fi
 
-# Use Composer "dev" minimum stability
+composer remove --no-update --dev friendsofphp/php-cs-fixer
+
 if [[ "$SYMFONY_VERSION" = *dev* ]]; then
     sed -i "s/\"MIT\"/\"MIT\",\"minimum-stability\":\"dev\"/g" composer.json
 fi
 
-# Install dependencies
 composer update --prefer-source `if [[ ${COMPOSER_PREFER_LOWEST} = true ]]; then echo "--prefer-lowest --prefer-stable"; fi`

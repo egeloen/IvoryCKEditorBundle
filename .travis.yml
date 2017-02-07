@@ -12,6 +12,9 @@ php:
 branches:
     only: master
 
+services:
+    - docker
+
 env:
     global:
         - COMPOSER_PREFER_LOWEST=false
@@ -24,6 +27,8 @@ after_success: travis/success.sh
 
 matrix:
     include:
+        - php: 5.6
+          env: DOCKER_BUILD=true
         - php: 5.6
           env: SYMFONY_VERSION=2.2.* COMPOSER_PREFER_LOWEST=true
         - php: 5.6
