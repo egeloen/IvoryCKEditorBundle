@@ -7,6 +7,8 @@ COMPOSER_PREFER_LOWEST=${COMPOSER_PREFER_LOWEST-false}
 DOCKER_BUILD=${DOCKER_BUILD=false}
 
 if [ ${DOCKER_BUILD} = true ]; then
+    cp .env.dist .env
+
     docker-compose build
     docker-compose run --rm php composer update --prefer-source
 
