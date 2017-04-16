@@ -190,7 +190,7 @@ class CKEditorRenderer implements CKEditorRendererInterface
 
             $config['contentsCss'] = [];
             foreach ($cssContents as $cssContent) {
-                $config['contentsCss'][] = $this->fixPath($this->fixUrl($cssContent));
+                $config['contentsCss'][] = $this->fixUrl($cssContent);
             }
         }
 
