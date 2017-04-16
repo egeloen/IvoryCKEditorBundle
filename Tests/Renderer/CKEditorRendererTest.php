@@ -242,7 +242,7 @@ class CKEditorRendererTest extends AbstractTestCase
      * @param string $asset
      * @param string $url
      *
-     * @dataProvider pathProvider
+     * @dataProvider pathContentsCssProvider
      */
     public function testRenderWidgetWithStringContentsCss($path, $asset, $url)
     {
@@ -263,7 +263,7 @@ class CKEditorRendererTest extends AbstractTestCase
      * @param string[] $assets
      * @param string[] $urls
      *
-     * @dataProvider pathsProvider
+     * @dataProvider pathsContentsCssProvider
      */
     public function testRenderWidgetWithArrayContentsCss(array $paths, array $assets, array $urls)
     {
@@ -657,6 +657,32 @@ class CKEditorRendererTest extends AbstractTestCase
             [['path1', 'path2'], ['url1?v=2', 'url2'], ['url1', 'url2']],
             [['path1', 'path2'], ['url1', 'url2?v=2'], ['url1', 'url2']],
             [['path1', 'path2'], ['url1?v=2', 'url2?v=2'], ['url1', 'url2']],
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    public function pathContentsCssProvider()
+    {
+        return [
+            ['path', 'url', 'url'],
+            ['path', 'url?v=2', 'url?v=2'],
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    public function pathsContentsCssProvider()
+    {
+        return [
+            [['path'], ['url'], ['url']],
+            [['path'], ['url?v=2'], ['url?v=2']],
+            [['path1', 'path2'], ['url1', 'url2'], ['url1', 'url2']],
+            [['path1', 'path2'], ['url1?v=2', 'url2'], ['url1?v=2', 'url2']],
+            [['path1', 'path2'], ['url1', 'url2?v=2'], ['url1', 'url2?v=2']],
+            [['path1', 'path2'], ['url1?v=2', 'url2?v=2'], ['url1?v=2', 'url2?v=2']],
         ];
     }
 
