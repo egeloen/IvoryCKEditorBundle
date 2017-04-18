@@ -25,7 +25,7 @@ in your configuration or in your widget:
 
     # app/config/config.yml
     ivory_ck_editor:
-        base_path: "ckeditor"
+        base_path: "ckeditor/"
         js_path:   "ckeditor/ckeditor.js"
 
 .. code-block:: php
