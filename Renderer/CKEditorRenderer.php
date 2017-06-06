@@ -138,6 +138,31 @@ class CKEditorRenderer implements CKEditorRendererInterface
         if (isset($template['imagesPath'])) {
             $template['imagesPath'] = $this->fixPath($template['imagesPath']);
         }
+        
+        /**
+         * Using Templating service to render a twig view;
+         * Before in config.yml (or CkeditorType::class) set the parameter 'html' : '@MyBundle:Templates:myTemplate-1.html.twig'
+         * Exemple :
+         *   ivory_ck_editor:
+         *        configs:
+         *           my_config:
+         *           extraPlugins : "templates,htmlwriter"
+         *        templates:    "my_templates"
+         *   templates:
+         *       my_templates:
+         *            imagesPath: "/bundles/mybundle/templates/images"
+         *            templates:
+         *                -
+         *                   title:       "My Template"
+         *                   image:       "image.jpg"
+         *                   description: "My awesome template"
+         *                   html:        '@MyBundle:Templates:myTemplate-1.html.twig'
+         */
+        foreach ($template['templates'] as $key => $view) {
+            if (substr($view['html'], 0, 1) === '@') {
+                $template['templates'][$key]['html'] = $this->container->get('templating')->render(trim($view['html'], '@'));
+            } 
+        }
 
         if (isset($template['templates'])) {
             foreach ($template['templates'] as &$rawTemplate) {
