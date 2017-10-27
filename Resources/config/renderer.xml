@@ -7,6 +7,7 @@
     <services>
         <service id="ivory_ck_editor.renderer" class="Ivory\CKEditorBundle\Renderer\CKEditorRenderer">
             <argument>%kernel.default_locale%</argument>
+            <argument type="service" id="ivory_ck_editor.renderer.json_builder" />
             <argument type="service" id="request_stack" on-invalid="null" />
             <argument type="service" id="twig" on-invalid="null" />
             <argument type="service" id="assets.packages" on-invalid="null" />

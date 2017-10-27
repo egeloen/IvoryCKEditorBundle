@@ -22,9 +22,8 @@ use Symfony\Component\Routing\RouterInterface;
  */
 class CKEditorRenderer implements CKEditorRendererInterface
 {
-    /** @var \Ivory\JsonBuilder\JsonBuilder */
-    private $jsonBuilder;
     private $defaultLocale;
+    private $jsonBuilder;
     private $requestStack;
     private $twig;
     private $assetsHelper;
@@ -33,10 +32,10 @@ class CKEditorRenderer implements CKEditorRendererInterface
     /**
      * Creates a CKEditor renderer.
      */
-    public function __construct($defaultLocale, RequestStack $requestStack = null, \Twig_Environment $twig = null, Packages $assetsHelper = null, RouterInterface $router = null)
+    public function __construct($defaultLocale, JsonBuilder $jsonBuilder, RequestStack $requestStack = null, \Twig_Environment $twig = null, Packages $assetsHelper = null, RouterInterface $router = null)
     {
-        $this->jsonBuilder = new JsonBuilder();
         $this->defaultLocale = $defaultLocale;
+        $this->jsonBuilder = $jsonBuilder;
         $this->requestStack = $requestStack;
         $this->twig = $twig;
         $this->assetsHelper = $assetsHelper;
@@ -75,7 +74,7 @@ class CKEditorRenderer implements CKEditorRendererInterface
             ? 'CKEDITOR.disableAutoInline = true;'."\n"
             : null;
 
-        $builder = $this->getJsonBuilder()->reset()->setValues($config);
+        $builder = $this->jsonBuilder->reset()->setValues($config);
         $this->fixConfigEscapedValues($builder, $config);
 
         $widget = sprintf(
@@ -132,7 +131,7 @@ class CKEditorRenderer implements CKEditorRendererInterface
             'CKEDITOR.stylesSet.add("%1$s", %2$s); '.
             '}',
             $name,
-            $this->getJsonBuilder()->reset()->setValues($stylesSet)->build()
+            $this->jsonBuilder->reset()->setValues($stylesSet)->build()
         );
     }
 
@@ -162,7 +161,7 @@ class CKEditorRenderer implements CKEditorRendererInterface
         return sprintf(
             'CKEDITOR.addTemplates("%s", %s);',
             $name,
-            $this->getJsonBuilder()->reset()->setValues($template)->build()
+            $this->jsonBuilder->reset()->setValues($template)->build()
         );
     }
 
@@ -302,14 +301,6 @@ class CKEditorRenderer implements CKEditorRendererInterface
         }
 
         return $url;
-    }
-
-    /**
-     * @return JsonBuilder
-     */
-    private function getJsonBuilder()
-    {
-        return $this->container->get('ivory_ck_editor.renderer.json_builder');
     }
 
     private function fixUrl($url)
