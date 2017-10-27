@@ -288,13 +288,11 @@ class CKEditorRenderer implements CKEditorRendererInterface
      */
     private function fixPath($path)
     {
-        $helper = $this->getAssets();
-
-        if ($helper === null) {
+        if (null === $this->assetsHelper) {
             return $path;
         }
 
-        $url = $helper->getUrl($path);
+        $url = $this->assetsHelper->getUrl($path);
 
         if (substr($path, -1) === '/' && ($position = strpos($url, '?')) !== false) {
             $url = substr($url, 0, $position);
