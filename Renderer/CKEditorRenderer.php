@@ -13,28 +13,33 @@ namespace Ivory\CKEditorBundle\Renderer;
 
 use Ivory\JsonBuilder\JsonBuilder;
 use Symfony\Component\Asset\Packages;
-use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\RouterInterface;
-use Symfony\Component\Templating\EngineInterface;
 
 /**
  * @author GeLo <geloen.eric@gmail.com>
  */
 class CKEditorRenderer implements CKEditorRendererInterface
 {
-    /**
-     * @var ContainerInterface
-     */
-    private $container;
+    private $defaultLocale;
+    private $jsonBuilder;
+    private $requestStack;
+    private $twig;
+    private $assetsHelper;
+    private $router;
 
     /**
-     * @param ContainerInterface $container
+     * Creates a CKEditor renderer.
      */
-    public function __construct(ContainerInterface $container)
+    public function __construct($defaultLocale, JsonBuilder $jsonBuilder, RequestStack $requestStack = null, \Twig_Environment $twig = null, Packages $assetsHelper = null, RouterInterface $router = null)
     {
-        $this->container = $container;
+        $this->defaultLocale = $defaultLocale;
+        $this->jsonBuilder = $jsonBuilder;
+        $this->requestStack = $requestStack;
+        $this->twig = $twig;
+        $this->assetsHelper = $assetsHelper;
+        $this->router = $router;
     }
 
     /**
@@ -69,7 +74,7 @@ class CKEditorRenderer implements CKEditorRendererInterface
             ? 'CKEDITOR.disableAutoInline = true;'."\n"
             : null;
 
-        $builder = $this->getJsonBuilder()->reset()->setValues($config);
+        $builder = $this->jsonBuilder->reset()->setValues($config);
         $this->fixConfigEscapedValues($builder, $config);
 
         $widget = sprintf(
@@ -126,7 +131,7 @@ class CKEditorRenderer implements CKEditorRendererInterface
             'CKEDITOR.stylesSet.add("%1$s", %2$s); '.
             '}',
             $name,
-            $this->getJsonBuilder()->reset()->setValues($stylesSet)->build()
+            $this->jsonBuilder->reset()->setValues($stylesSet)->build()
         );
     }
 
@@ -142,7 +147,7 @@ class CKEditorRenderer implements CKEditorRendererInterface
         if (isset($template['templates'])) {
             foreach ($template['templates'] as &$rawTemplate) {
                 if (isset($rawTemplate['template'])) {
-                    $rawTemplate['html'] = $this->getTemplating()->render(
+                    $rawTemplate['html'] = $this->twig->render(
                         $rawTemplate['template'],
                         isset($rawTemplate['template_parameters']) ? $rawTemplate['template_parameters'] : []
                     );
@@ -156,7 +161,7 @@ class CKEditorRenderer implements CKEditorRendererInterface
         return sprintf(
             'CKEDITOR.addTemplates("%s", %s);',
             $name,
-            $this->getJsonBuilder()->reset()->setValues($template)->build()
+            $this->jsonBuilder->reset()->setValues($template)->build()
         );
     }
 
@@ -224,9 +229,9 @@ class CKEditorRenderer implements CKEditorRendererInterface
             $routeType = $fileBrowserKey.'RouteType';
 
             if (isset($config[$handler])) {
-                $config[$url] = $config[$handler]($this->getRouter());
+                $config[$url] = $config[$handler]($this->router);
             } elseif (isset($config[$route])) {
-                $config[$url] = $this->getRouter()->generate(
+                $config[$url] = $this->router->generate(
                     $config[$route],
                     isset($config[$routeParameters]) ? $config[$routeParameters] : [],
                     isset($config[$routeType]) ? $config[$routeType] : UrlGeneratorInterface::ABSOLUTE_PATH
@@ -283,13 +288,11 @@ class CKEditorRenderer implements CKEditorRendererInterface
      */
     private function fixPath($path)
     {
-        $helper = $this->getAssets();
-
-        if ($helper === null) {
+        if (null === $this->assetsHelper) {
             return $path;
         }
 
-        $url = $helper->getUrl($path);
+        $url = $this->assetsHelper->getUrl($path);
 
         if (substr($path, -1) === '/' && ($position = strpos($url, '?')) !== false) {
             $url = substr($url, 0, $position);
@@ -298,12 +301,13 @@ class CKEditorRenderer implements CKEditorRendererInterface
         return $url;
     }
 
-    /**
-     * @return JsonBuilder
-     */
-    private function getJsonBuilder()
+    private function fixUrl($url)
     {
-        return $this->container->get('ivory_ck_editor.renderer.json_builder');
+        if (null !== $this->assetsHelper) {
+            $url = $this->assetsHelper->getUrl($url);
+        }
+
+        return $url;
     }
 
     /**
@@ -311,46 +315,10 @@ class CKEditorRenderer implements CKEditorRendererInterface
      */
     private function getLanguage()
     {
-        if (($request = $this->getRequest()) !== null) {
+        if (null !== $request = $this->requestStack->getMasterRequest()) {
             return $request->getLocale();
         }
 
-        if ($this->container->hasParameter($parameter = 'locale')) {
-            return $this->container->getParameter($parameter);
-        }
-    }
-
-    /**
-     * @return Request|null
-     */
-    private function getRequest()
-    {
-        return $this->container->get('request_stack')->getMasterRequest();
-    }
-
-    /**
-     * @return \Twig_Environment|EngineInterface
-     */
-    private function getTemplating()
-    {
-        return $this->container->has($templating = 'twig')
-            ? $this->container->get($templating)
-            : $this->container->get('templating');
-    }
-
-    /**
-     * @return Packages|null
-     */
-    private function getAssets()
-    {
-        return $this->container->get('assets.packages', ContainerInterface::NULL_ON_INVALID_REFERENCE);
-    }
-
-    /**
-     * @return RouterInterface
-     */
-    private function getRouter()
-    {
-        return $this->container->get('router');
+        return $this->defaultLocale;
     }
 }
