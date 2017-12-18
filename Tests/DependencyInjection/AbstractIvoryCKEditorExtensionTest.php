@@ -15,6 +15,7 @@ use Ivory\CKEditorBundle\DependencyInjection\IvoryCKEditorExtension;
 use Ivory\CKEditorBundle\Form\Type\CKEditorType;
 use Ivory\CKEditorBundle\IvoryCKEditorBundle;
 use Ivory\CKEditorBundle\Tests\AbstractTestCase;
+use Symfony\Bundle\FrameworkBundle\Templating\EngineInterface;
 use Symfony\Component\Asset\Packages;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Form\AbstractType;
@@ -49,11 +50,17 @@ abstract class AbstractIvoryCKEditorExtensionTest extends AbstractTestCase
     private $formRenderer;
 
     /**
+     * @var EngineInterface|\PHPUnit_Framework_MockObject_MockObject
+     */
+    private $templating;
+
+    /**
      * {@inheritdoc}
      */
     protected function setUp()
     {
         $this->router = $this->createMock(RouterInterface::class);
+        $this->templating = $this->createMock(EngineInterface::class);
         $this->formRenderer = $this->createMock(FormRendererInterface::class);
         $this->packages = $this->getMockBuilder(Packages::class)
             ->disableOriginalConstructor()
@@ -63,6 +70,7 @@ abstract class AbstractIvoryCKEditorExtensionTest extends AbstractTestCase
 
         $this->container->set('assets.packages', $this->packages);
         $this->container->set('router', $this->router);
+        $this->container->set('templating', $this->templating);
         $this->container->set('templating.form.renderer', $this->formRenderer);
         $this->container->set('twig.form.renderer', $this->formRenderer);
 

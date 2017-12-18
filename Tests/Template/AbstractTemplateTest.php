@@ -15,8 +15,8 @@ use Ivory\CKEditorBundle\Renderer\CKEditorRenderer;
 use Ivory\CKEditorBundle\Renderer\CKEditorRendererInterface;
 use Ivory\CKEditorBundle\Tests\AbstractTestCase;
 use Ivory\JsonBuilder\JsonBuilder;
+use Psr\Container\ContainerInterface;
 use Symfony\Component\Asset\Packages;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\RouterInterface;
@@ -74,23 +74,19 @@ abstract class AbstractTemplateTest extends AbstractTestCase
             ->method('get')
             ->will($this->returnValueMap([
                 [
-                    'assets.packages',
-                    ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE,
+                    Packages::class,
                     $this->packages,
                 ],
                 [
-                    'ivory_ck_editor.renderer.json_builder',
-                    ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE,
+                    JsonBuilder::class,
                     new JsonBuilder(),
                 ],
                 [
-                    'request_stack',
-                    ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE,
+                    RequestStack::class,
                     $this->requestStack,
                 ],
                 [
-                    'router',
-                    ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE,
+                    RouterInterface::class,
                     $this->router,
                 ],
             ]));

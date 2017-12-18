@@ -5,11 +5,24 @@
     xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd"
 >
     <services>
-        <service id="ivory_ck_editor.renderer" class="Ivory\CKEditorBundle\Renderer\CKEditorRenderer" public="true">
-            <argument type="service" id="service_container" />
+        <service id="ivory_ck_editor.renderer.service_locator" class="Symfony\Component\DependencyInjection\ServiceLocator">
+            <argument type="collection">
+                <argument key="Twig_Environment" type="service" id="twig" on-invalid="ignore" />
+                <argument key="Symfony\Component\Templating\EngineInterface" type="service" id="templating" />
+                <argument key="Ivory\JsonBuilder\JsonBuilder" type="service" id="ivory_ck_editor.renderer.json_builder" />
+                <argument key="Symfony\Component\HttpFoundation\RequestStack" type="service" id="request_stack" on-invalid="ignore" />
+                <argument key="Symfony\Component\Asset\Packages" type="service" id="assets.packages" on-invalid="null" />
+                <argument key="Symfony\Component\Routing\RouterInterface" type="service" id="router" />
+            </argument>
+            <tag name="container.service_locator" />
         </service>
 
-        <service id="ivory_ck_editor.renderer.json_builder" class="Ivory\JsonBuilder\JsonBuilder" public="true">
+        <service id="ivory_ck_editor.renderer" class="Ivory\CKEditorBundle\Renderer\CKEditorRenderer">
+            <argument type="service" id="ivory_ck_editor.renderer.service_locator" />
+            <argument type="string" id="%locale%" on-invalid="null" />
+        </service>
+
+        <service id="ivory_ck_editor.renderer.json_builder" class="Ivory\JsonBuilder\JsonBuilder">
             <argument type="service" id="property_accessor" on-invalid="null" />
         </service>
     </services>

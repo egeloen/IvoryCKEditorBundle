@@ -12,9 +12,10 @@
 namespace Ivory\CKEditorBundle\Renderer;
 
 use Ivory\JsonBuilder\JsonBuilder;
+use Psr\Container\ContainerInterface;
 use Symfony\Component\Asset\Packages;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Templating\EngineInterface;
@@ -27,14 +28,21 @@ class CKEditorRenderer implements CKEditorRendererInterface
     /**
      * @var ContainerInterface
      */
-    private $container;
+    private $locator;
 
     /**
-     * @param ContainerInterface $container
+     * @var string|null
      */
-    public function __construct(ContainerInterface $container)
+    private $locale;
+
+    /**
+     * @param ContainerInterface $locator
+     * @param string|null $locale
+     */
+    public function __construct(ContainerInterface $locator, $locale = null)
     {
-        $this->container = $container;
+        $this->locator = $locator;
+        $this->locale = $locale;
     }
 
     /**
@@ -303,7 +311,7 @@ class CKEditorRenderer implements CKEditorRendererInterface
      */
     private function getJsonBuilder()
     {
-        return $this->container->get('ivory_ck_editor.renderer.json_builder');
+        return $this->locator->get(JsonBuilder::class);
     }
 
     /**
@@ -315,9 +323,7 @@ class CKEditorRenderer implements CKEditorRendererInterface
             return $request->getLocale();
         }
 
-        if ($this->container->hasParameter($parameter = 'locale')) {
-            return $this->container->getParameter($parameter);
-        }
+        return $this->locale;
     }
 
     /**
@@ -325,7 +331,7 @@ class CKEditorRenderer implements CKEditorRendererInterface
      */
     private function getRequest()
     {
-        return $this->container->get('request_stack')->getMasterRequest();
+        return $this->locator->get(RequestStack::class)->getMasterRequest();
     }
 
     /**
@@ -333,9 +339,11 @@ class CKEditorRenderer implements CKEditorRendererInterface
      */
     private function getTemplating()
     {
-        return $this->container->has($templating = 'twig')
-            ? $this->container->get($templating)
-            : $this->container->get('templating');
+        if (\class_exists(\Twig_Environment::class) && $this->locator->has(\Twig_Environment::class)) {
+            return $this->locator->get(\Twig_Environment::class);
+        }
+
+        return $this->locator->get(EngineInterface::class);
     }
 
     /**
@@ -343,7 +351,7 @@ class CKEditorRenderer implements CKEditorRendererInterface
      */
     private function getAssets()
     {
-        return $this->container->get('assets.packages', ContainerInterface::NULL_ON_INVALID_REFERENCE);
+        return $this->locator->get(Packages::class);
     }
 
     /**
@@ -351,6 +359,6 @@ class CKEditorRenderer implements CKEditorRendererInterface
      */
     private function getRouter()
     {
-        return $this->container->get('router');
+        return $this->locator->get(RouterInterface::class);
     }
 }

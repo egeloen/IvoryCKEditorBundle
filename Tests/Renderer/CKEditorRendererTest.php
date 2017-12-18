@@ -15,8 +15,8 @@ use Ivory\CKEditorBundle\Renderer\CKEditorRenderer;
 use Ivory\CKEditorBundle\Renderer\CKEditorRendererInterface;
 use Ivory\CKEditorBundle\Tests\AbstractTestCase;
 use Ivory\JsonBuilder\JsonBuilder;
+use Psr\Container\ContainerInterface;
 use Symfony\Component\Asset\Packages;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -36,7 +36,7 @@ class CKEditorRendererTest extends AbstractTestCase
     /**
      * @var ContainerInterface|\PHPUnit_Framework_MockObject_MockObject
      */
-    private $container;
+    private $locator;
 
     /**
      * @var Packages|\PHPUnit_Framework_MockObject_MockObject
@@ -85,44 +85,38 @@ class CKEditorRendererTest extends AbstractTestCase
             ->disableOriginalConstructor()
             ->getMock();
 
-        $this->container = $this->createMock(ContainerInterface::class);
-        $this->container
+        $this->locator = $this->createMock(ContainerInterface::class);
+        $this->locator
             ->expects($this->any())
             ->method('get')
             ->will($this->returnValueMap([
                 [
-                    'assets.packages',
-                    ContainerInterface::NULL_ON_INVALID_REFERENCE,
+                    Packages::class,
                     $this->packages,
                 ],
                 [
-                    'ivory_ck_editor.renderer.json_builder',
-                    ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE,
+                    JsonBuilder::class,
                     new JsonBuilder(),
                 ],
                 [
-                    'request_stack',
-                    ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE,
+                    RequestStack::class,
                     $this->requestStack,
                 ],
                 [
-                    'router',
-                    ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE,
+                    RouterInterface::class,
                     $this->router,
                 ],
                 [
-                    'templating',
-                    ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE,
+                    EngineInterface::class,
                     $this->templating,
                 ],
                 [
-                    'twig',
-                    ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE,
+                    \Twig_Environment::class,
                     $this->twig,
                 ],
             ]));
 
-        $this->renderer = new CKEditorRenderer($this->container);
+        $this->renderer = new CKEditorRenderer($this->locator, null);
     }
 
     public function testDefaultState()
@@ -191,17 +185,7 @@ class CKEditorRendererTest extends AbstractTestCase
      */
     public function testRenderWidgetWithLocaleParameter($symfonyLocale, $ckEditorLocale)
     {
-        $this->container
-            ->expects($this->once())
-            ->method('hasParameter')
-            ->with($this->identicalTo('locale'))
-            ->will($this->returnValue(true));
-
-        $this->container
-            ->expects($this->once())
-            ->method('getParameter')
-            ->with($this->identicalTo('locale'))
-            ->will($this->returnValue($symfonyLocale));
+        $this->renderer = new CKEditorRenderer($this->locator, $symfonyLocale);
 
         $this->assertSame(
             'CKEDITOR.replace("foo", {"language":"'.$ckEditorLocale.'"});',
@@ -225,12 +209,6 @@ class CKEditorRendererTest extends AbstractTestCase
 
     public function testRenderWidgetWithoutLocale()
     {
-        $this->container
-            ->expects($this->once())
-            ->method('hasParameter')
-            ->with($this->identicalTo('locale'))
-            ->will($this->returnValue(false));
-
         $this->assertSame(
             'CKEDITOR.replace("foo", []);',
             $this->renderer->renderWidget('foo', [])
@@ -554,10 +532,10 @@ class CKEditorRendererTest extends AbstractTestCase
             ->with($this->equalTo($path))
             ->will($this->returnValue($asset));
 
-        $this->container
+        $this->locator
             ->expects($this->once())
             ->method('has')
-            ->with($this->identicalTo('twig'))
+            ->with($this->identicalTo(\Twig_Environment::class))
             ->will($this->returnValue(true));
 
         $this->twig
@@ -603,10 +581,10 @@ class CKEditorRendererTest extends AbstractTestCase
             ->with($this->equalTo($path))
             ->will($this->returnValue($asset));
 
-        $this->container
+        $this->locator
             ->expects($this->once())
             ->method('has')
-            ->with($this->identicalTo('twig'))
+            ->with($this->identicalTo(\Twig_Environment::class))
             ->will($this->returnValue(false));
 
         $this->templating
