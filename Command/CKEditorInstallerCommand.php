@@ -320,6 +320,10 @@ EOF
     {
         $helper = new QuestionHelper();
 
+        if (is_array($question)) {
+            $question = implode("\n", $question);
+        }
+
         $result = $helper->ask($input, $output, new ChoiceQuestion(
             $question,
             $choices,
