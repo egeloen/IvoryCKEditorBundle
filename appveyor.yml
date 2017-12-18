@@ -28,6 +28,7 @@ install:
     - IF %PHP%==1 echo extension_dir=ext >> php.ini
     - IF %PHP%==1 echo extension=php_fileinfo.dll >> php.ini
     - IF %PHP%==1 echo extension=php_openssl.dll >> php.ini
+    - IF %PHP%==1 echo extension=php_mbstring.dll >> php.ini
     - appveyor DownloadFile https://getcomposer.org/composer.phar
     - cd c:\project
     - composer update --prefer-source
