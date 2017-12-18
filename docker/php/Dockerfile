@@ -1,4 +1,5 @@
-FROM php:latest
+ARG PHP_VERSION=latest
+FROM php:${PHP_VERSION}
 
 # APT packages
 RUN apt-get update && apt-get install -y \

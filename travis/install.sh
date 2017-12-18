@@ -10,7 +10,7 @@ if [ "$DOCKER_BUILD" = true ]; then
     cp .env.dist .env
     sed -i -e 's/USER_ID=1000/USER_ID='"$UID"'/g' .env
 
-    docker-compose build
+    docker-compose build --build-arg PHP_VERSION=${TRAVIS_PHP_VERSION:-latest}
     docker-compose run --rm php composer update --prefer-source
 
     exit
