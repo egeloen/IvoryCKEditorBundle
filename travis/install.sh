@@ -26,6 +26,8 @@ composer require --no-update --dev symfony/templating:${SYMFONY_VERSION}
 composer require --no-update --dev symfony/twig-bridge:${SYMFONY_VERSION}
 composer require --no-update --dev symfony/yaml:${SYMFONY_VERSION}
 
+composer require --no-update --dev composer/composer:dev-master
+
 composer remove --no-update --dev friendsofphp/php-cs-fixer
 
 if [[ "$SYMFONY_VERSION" = *dev* ]]; then

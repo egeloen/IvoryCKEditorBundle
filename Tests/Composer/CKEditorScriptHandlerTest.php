@@ -36,8 +36,12 @@ class CKEditorScriptHandlerTest extends AbstractTestCase
      */
     protected function setUp()
     {
-        if (!\class_exists(Sensio\Bundle\DistributionBundle\Composer\ScriptHandler::class)) {
+        if (!\class_exists(\Sensio\Bundle\DistributionBundle\Composer\ScriptHandler::class)) {
             $this->markTestSkipped("Missing sensio/distribution-bundle");
+        }
+
+        if (!\class_exists(\Composer\Script\Event::class)) {
+            $this->markTestSkipped("Missing composer/composer dev-dependency");
         }
 
         $this->path = __DIR__.'/../../Resources/public';

@@ -16,7 +16,7 @@ env:
         - COMPOSER_PREFER_LOWEST=false
         - DOCKER_BUILD=false
         - SYMFONY_DEPRECATIONS_HELPER=strict
-        - SYMFONY_VERSION=2.7.*
+        - SYMFONY_VERSION=3.3.*
 
 install: travis/install.sh
 script: travis/script.sh
@@ -28,17 +28,7 @@ matrix:
           services: [docker]
           env: DOCKER_BUILD=true
         - php: 5.6
-          env: SYMFONY_VERSION=2.7.* COMPOSER_PREFER_LOWEST=true
-        - php: 5.6
-          env: SYMFONY_VERSION=3.0.* COMPOSER_PREFER_LOWEST=true
-        - php: 5.6
-          env: SYMFONY_VERSION=2.8.*
-        - php: 5.6
-          env: SYMFONY_VERSION=3.0.*
-        - php: 5.6
-          env: SYMFONY_VERSION=3.1.*
-        - php: 5.6
-          env: SYMFONY_VERSION=3.2.*
+          env: SYMFONY_VERSION=3.3.* COMPOSER_PREFER_LOWEST=true
         - php: 5.6
           env: SYMFONY_VERSION=3.3.*
         - php: 5.6
