@@ -58,6 +58,10 @@ class CKEditorScriptHandler extends ScriptHandler
             $command .= ' --clear='.$extra['ckeditor-clear'];
         }
 
+        if (isset($extra['ckeditor-quiet']) && $extra['ckeditor-quiet'] === 'true') {
+            $command .= ' --quiet';
+        }
+
         if (isset($extra['ckeditor-exclude'])) {
             foreach ($extra['ckeditor-exclude'] as $exclude) {
                 $command .= ' --exclude='.$exclude;
