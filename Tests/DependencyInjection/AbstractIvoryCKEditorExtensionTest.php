@@ -15,10 +15,12 @@ use Ivory\CKEditorBundle\DependencyInjection\IvoryCKEditorExtension;
 use Ivory\CKEditorBundle\Form\Type\CKEditorType;
 use Ivory\CKEditorBundle\IvoryCKEditorBundle;
 use Ivory\CKEditorBundle\Tests\AbstractTestCase;
+use PHPUnit\Framework\MockObject\MockObject;
 use Symfony\Component\Asset\Packages;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormRendererInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Templating\Helper\CoreAssetsHelper;
 
@@ -34,17 +36,17 @@ abstract class AbstractIvoryCKEditorExtensionTest extends AbstractTestCase
     private $container;
 
     /**
-     * @var Packages|CoreAssetsHelper|\PHPUnit_Framework_MockObject_MockObject
+     * @var Packages|CoreAssetsHelper|MockObject
      */
     private $packages;
 
     /**
-     * @var RouterInterface|\PHPUnit_Framework_MockObject_MockObject
+     * @var RouterInterface|MockObject
      */
     private $router;
 
     /**
-     * @var FormRendererInterface|\PHPUnit_Framework_MockObject_MockObject
+     * @var FormRendererInterface|MockObject
      */
     private $formRenderer;
 
@@ -65,6 +67,7 @@ abstract class AbstractIvoryCKEditorExtensionTest extends AbstractTestCase
         $this->container->set('router', $this->router);
         $this->container->set('templating.form.renderer', $this->formRenderer);
         $this->container->set('twig.form.renderer', $this->formRenderer);
+        $this->container->set('request_stack', $this->createMock(RequestStack::class));
 
         $this->container->registerExtension($extension = new IvoryCKEditorExtension());
         $this->container->loadFromExtension($extension->getAlias());

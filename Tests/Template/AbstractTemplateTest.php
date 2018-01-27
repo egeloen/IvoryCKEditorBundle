@@ -16,10 +16,11 @@ use Ivory\CKEditorBundle\Renderer\CKEditorRendererInterface;
 use Ivory\CKEditorBundle\Tests\AbstractTestCase;
 use Ivory\JsonBuilder\JsonBuilder;
 use Symfony\Component\Asset\Packages;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Form\FormView;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\RouterInterface;
+use Symfony\Component\Templating\EngineInterface;
 
 /**
  * @author GeLo <geloen.eric@gmail.com>
@@ -33,69 +34,38 @@ abstract class AbstractTemplateTest extends AbstractTestCase
     protected $renderer;
 
     /**
-     * @var ContainerInterface|\PHPUnit_Framework_MockObject_MockObject
-     */
-    private $container;
-
-    /**
-     * @var Packages|\PHPUnit_Framework_MockObject_MockObject
-     */
-    private $packages;
-
-    /**
-     * @var RequestStack|\PHPUnit_Framework_MockObject_MockObject
-     */
-    private $requestStack;
-
-    /**
-     * @var RouterInterface|\PHPUnit_Framework_MockObject_MockObject
-     */
-    private $router;
-
-    /**
      * {@inheritdoc}
      */
     protected function setUp()
     {
-        $this->requestStack = $this->createMock(RequestStack::class);
-        $this->router = $this->createMock(RouterInterface::class);
-        $this->packages = $this->getMockBuilder(Packages::class)
+        $jsonBuilder = new JsonBuilder();
+
+        $requestStack = $this->createMock(RequestStack::class);
+        $requestStack
+            ->expects($this->once())
+            ->method('getMasterRequest')
+            ->will($this->returnValue($this->createMock(Request::class)));
+
+        $router = $this->createMock(RouterInterface::class);
+        $packages = $this->getMockBuilder(Packages::class)
             ->disableOriginalConstructor()
             ->getMock();
 
-        $this->packages
+        $packages
             ->expects($this->any())
             ->method('getUrl')
             ->will($this->returnArgument(0));
 
-        $this->container = $this->createMock(ContainerInterface::class);
-        $this->container
-            ->expects($this->any())
-            ->method('get')
-            ->will($this->returnValueMap([
-                [
-                    'assets.packages',
-                    ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE,
-                    $this->packages,
-                ],
-                [
-                    'ivory_ck_editor.renderer.json_builder',
-                    ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE,
-                    new JsonBuilder(),
-                ],
-                [
-                    'request_stack',
-                    ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE,
-                    $this->requestStack,
-                ],
-                [
-                    'router',
-                    ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE,
-                    $this->router,
-                ],
-            ]));
+        $templating = $this->createMock(EngineInterface::class);
 
-        $this->renderer = new CKEditorRenderer($this->container);
+        $this->renderer = new CKEditorRenderer(
+            $jsonBuilder,
+            $router,
+            $requestStack,
+            $packages,
+            $templating,
+            null
+        );
     }
 
     public function testDefaultState()
