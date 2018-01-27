@@ -13,7 +13,6 @@ namespace Ivory\CKEditorBundle\Renderer;
 
 use Ivory\JsonBuilder\JsonBuilder;
 use Symfony\Component\Asset\Packages;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\RouterInterface;
@@ -43,6 +42,11 @@ class CKEditorRenderer implements CKEditorRendererInterface
      * @var EngineInterface
      */
     private $templating;
+
+    /**
+     * @var string|null
+     */
+    private $locale;
 
     public function __construct(
         JsonBuilder $jsonBuilder,
