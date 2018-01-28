@@ -1,0 +1,14 @@
+<?xml version="1.0" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd"
+>
+    <services>
+        <service id="test.ivory_ck_editor.config_manager" alias="ivory_ck_editor.config_manager" public="true" />
+        <service id="test.ivory_ck_editor.plugin_manager" alias="ivory_ck_editor.plugin_manager" public="true" />
+        <service id="test.ivory_ck_editor.styles_set_manager" alias="ivory_ck_editor.styles_set_manager" public="true" />
+        <service id="test.ivory_ck_editor.template_manager" alias="ivory_ck_editor.template_manager" public="true" />
+        <service id="test.ivory_ck_editor.toolbar_manager" alias="ivory_ck_editor.toolbar_manager" public="true" />
+    </services>
+</container>
