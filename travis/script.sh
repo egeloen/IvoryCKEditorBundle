@@ -7,6 +7,8 @@ DOCKER_BUILD=${DOCKER_BUILD-false}
 
 if [ "$DOCKER_BUILD" = false ]; then
     vendor/bin/phpunit `if [ ! "$TRAVIS_PHP_VERSION" = "hhvm" ]; then echo "--coverage-clover build/clover.xml"; fi`
+    composer remove -n --dev "sensio/distribution-bundle"
+    vendor/bin/phpunit
 fi
 
 if [ "$DOCKER_BUILD" = true ]; then

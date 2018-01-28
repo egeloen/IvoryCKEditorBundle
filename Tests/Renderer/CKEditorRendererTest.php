@@ -467,12 +467,13 @@ class CKEditorRendererTest extends AbstractTestCase
      *
      * @dataProvider directoryAssetProvider
      */
-    public function testRenderTemplateWithPhpTemplating($path, $asset, $url)
+    public function testRenderTemplateWithAnEngine($path, $asset, $url)
     {
         $templates = [
             [
-                'title'    => 'Template title',
-                'template' => $template = 'template_name',
+                'title'               => 'Template title',
+                'template'            => $template = 'template_name',
+                'template_parameters' => $templateParameters = ['foo' => 'bar'],
             ],
         ];
 
@@ -492,7 +493,7 @@ class CKEditorRendererTest extends AbstractTestCase
         $this->templating
             ->expects($this->once())
             ->method('render')
-            ->with($this->identicalTo($template), $this->identicalTo([]))
+            ->with($this->identicalTo($template), $this->identicalTo($templateParameters))
             ->will($this->returnValue($html));
 
         $json = json_encode(['imagesPath' => $url, 'templates'  => $processedTemplates]);
