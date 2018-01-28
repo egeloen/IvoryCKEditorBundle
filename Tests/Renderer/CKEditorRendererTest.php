@@ -122,7 +122,7 @@ class CKEditorRendererTest extends AbstractTestCase
     public function testRenderWidgetWithLocaleRequest($symfonyLocale, $ckEditorLocale)
     {
         $this->request
-            ->expects($this->once())
+            ->expects($this->exactly(2))
             ->method('getLocale')
             ->will($this->returnValue($symfonyLocale));
 
@@ -141,7 +141,7 @@ class CKEditorRendererTest extends AbstractTestCase
     public function testRenderWidgetWithLocaleParameter($symfonyLocale, $ckEditorLocale)
     {
         $this->request
-            ->expects($this->once())
+            ->expects($this->exactly(1))
             ->method('getLocale')
             ->will($this->returnValue(null));
 

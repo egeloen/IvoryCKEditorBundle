@@ -60,8 +60,12 @@ class CKEditorRenderer implements CKEditorRendererInterface
         $this->router = $router;
         $this->packages = $packages;
         $this->templating = $templating;
-        $requestLocale = $requestStack->getMasterRequest()->getLocale();
-        $this->locale = $requestLocale ? $requestLocale : $locale;
+        $request = $requestStack->getMasterRequest();
+        if ($request && null !== $request->getLocale()) {
+            $this->locale = $request->getLocale();
+        } else {
+            $this->locale = $locale;
+        }
     }
 
     /**

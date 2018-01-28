@@ -30,6 +30,7 @@ class IvoryCKEditorExtension extends ConfigurableExtension
     {
         $this->loadResources($container);
         $this->registerConfig($config, $container);
+        $this->setLocaleForRenderer($container);
 
         if (!isset($config['enable']) || $config['enable']) {
             $this->registerConfigs($config, $container);
@@ -226,6 +227,16 @@ class IvoryCKEditorExtension extends ConfigurableExtension
             $container
                 ->getDefinition('ivory_ck_editor.form.type')
                 ->addMethodCall('setFilebrowsers', [$config['filebrowsers']]);
+        }
+    }
+
+    /**
+     * @param ContainerBuilder $container
+     */
+    private function setLocaleForRenderer(ContainerBuilder $container)
+    {
+        if ($container->hasParameter('locale')) {
+            $container->getDefinition('ivory_ck_editor.renderer')->replaceArgument(5, $container->getParameter('locale'));
         }
     }
 }
