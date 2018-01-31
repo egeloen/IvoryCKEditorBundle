@@ -20,12 +20,15 @@ use Composer\Script\Event;
 use Ivory\CKEditorBundle\Composer\CKEditorScriptHandler;
 use Ivory\CKEditorBundle\Installer\CKEditorInstaller;
 use Ivory\CKEditorBundle\Tests\AbstractTestCase;
+use Sensio\Bundle\DistributionBundle\SensioDistributionBundle;
 
 /**
  * @author GeLo <geloen.eric@gmail.com>
  */
 class CKEditorScriptHandlerTest extends AbstractTestCase
 {
+    const SKIPPED_MESSAGE = 'Install sensio/distribution-bundle to run this test';
+
     /**
      * @var string
      */
@@ -36,6 +39,10 @@ class CKEditorScriptHandlerTest extends AbstractTestCase
      */
     protected function setUp()
     {
+        if (!$this->isDistributionBundleInstalled()) {
+            return;
+        }
+
         $this->path = __DIR__.'/../../Resources/public';
 
         $this->tearDown();
@@ -46,6 +53,10 @@ class CKEditorScriptHandlerTest extends AbstractTestCase
      */
     protected function tearDown()
     {
+        if (!$this->isDistributionBundleInstalled()) {
+            return;
+        }
+
         if (file_exists($this->path)) {
             exec('rm -rf '.$this->path);
         }
@@ -53,12 +64,20 @@ class CKEditorScriptHandlerTest extends AbstractTestCase
 
     public function testInstall()
     {
+        if (!$this->isDistributionBundleInstalled()) {
+            $this->markTestSkipped(self::SKIPPED_MESSAGE);
+        }
+
         CKEditorScriptHandler::install($this->createEventMock());
         $this->assertInstall();
     }
 
     public function testReinstall()
     {
+        if (!$this->isDistributionBundleInstalled()) {
+            $this->markTestSkipped(self::SKIPPED_MESSAGE);
+        }
+
         CKEditorScriptHandler::install($this->createEventMock());
         $this->assertInstall();
 
@@ -126,5 +145,10 @@ class CKEditorScriptHandlerTest extends AbstractTestCase
     private function assertInstall()
     {
         $this->assertFileExists($this->path.'/ckeditor.js');
+    }
+
+    private function isDistributionBundleInstalled()
+    {
+        return class_exists(SensioDistributionBundle::class);
     }
 }

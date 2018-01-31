@@ -69,26 +69,26 @@ class CKEditorInstallerCommand extends Command
 The <info>%command.name%</info> command install CKEditor in your application:
 
   <info>php %command.full_name%</info>
-  
+
 You can install it at a specific path (absolute):
 
   <info>php %command.full_name% path</info>
-  
+
 You can install a specific release (basic, standard or full):
 
   <info>php %command.full_name% --release=full</info>
-  
+
 You can install a specific version:
 
   <info>php %command.full_name% --tag=4.7.0</info>
 
-If there is a previous CKEditor installation detected, 
+If there is a previous CKEditor installation detected,
 you can control how it should be handled in non-interactive mode:
 
   <info>php %command.full_name% --clear=drop</info>
   <info>php %command.full_name% --clear=keep</info>
   <info>php %command.full_name% --clear=skip</info>
-  
+
 You can exclude path(s) when extracting CKEditor:
 
   <info>php %command.full_name% --exclude=samples --exclude=adapters</info>
@@ -318,6 +318,10 @@ EOF
      */
     private function choice($question, array $choices, $default, InputInterface $input, OutputInterface $output)
     {
+        if (is_array($question)) {
+            $question = implode("\n", $question);
+        }
+
         $helper = new QuestionHelper();
 
         $result = $helper->ask($input, $output, new ChoiceQuestion(

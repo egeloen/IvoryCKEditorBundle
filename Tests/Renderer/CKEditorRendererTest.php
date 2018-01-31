@@ -15,8 +15,8 @@ use Ivory\CKEditorBundle\Renderer\CKEditorRenderer;
 use Ivory\CKEditorBundle\Renderer\CKEditorRendererInterface;
 use Ivory\CKEditorBundle\Tests\AbstractTestCase;
 use Ivory\JsonBuilder\JsonBuilder;
+use PHPUnit\Framework\MockObject\MockObject;
 use Symfony\Component\Asset\Packages;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -29,50 +29,41 @@ use Symfony\Component\Templating\EngineInterface;
 class CKEditorRendererTest extends AbstractTestCase
 {
     /**
-     * @var CKEditorRenderer
+     * @var JsonBuilder
      */
-    private $renderer;
+    private $jsonBuilder;
 
     /**
-     * @var ContainerInterface|\PHPUnit_Framework_MockObject_MockObject
-     */
-    private $container;
-
-    /**
-     * @var Packages|\PHPUnit_Framework_MockObject_MockObject
+     * @var Packages|MockObject
      */
     private $packages;
 
     /**
-     * @var Request|\PHPUnit_Framework_MockObject_MockObject
+     * @var Request|MockObject
      */
     private $request;
 
     /**
-     * @var RequestStack|\PHPUnit_Framework_MockObject_MockObject
+     * @var RequestStack|MockObject
      */
     private $requestStack;
 
     /**
-     * @var RouterInterface|\PHPUnit_Framework_MockObject_MockObject
+     * @var RouterInterface|MockObject
      */
     private $router;
 
     /**
-     * @var EngineInterface|\PHPUnit_Framework_MockObject_MockObject
+     * @var EngineInterface|MockObject
      */
     private $templating;
-
-    /**
-     * @var \Twig_Environment|\PHPUnit_Framework_MockObject_MockObject
-     */
-    private $twig;
 
     /**
      * {@inheritdoc}
      */
     protected function setUp()
     {
+        $this->jsonBuilder = new JsonBuilder();
         $this->request = $this->createMock(Request::class);
         $this->router = $this->createMock(RouterInterface::class);
         $this->packages = $this->getMockBuilder(Packages::class)
@@ -80,54 +71,17 @@ class CKEditorRendererTest extends AbstractTestCase
             ->getMock();
 
         $this->requestStack = $this->createMock(RequestStack::class);
+        $this->requestStack
+            ->expects($this->once())
+            ->method('getMasterRequest')
+                ->will($this->returnValue($this->request));
+
         $this->templating = $this->createMock(EngineInterface::class);
-        $this->twig = $this->getMockBuilder(\Twig_Environment::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-
-        $this->container = $this->createMock(ContainerInterface::class);
-        $this->container
-            ->expects($this->any())
-            ->method('get')
-            ->will($this->returnValueMap([
-                [
-                    'assets.packages',
-                    ContainerInterface::NULL_ON_INVALID_REFERENCE,
-                    $this->packages,
-                ],
-                [
-                    'ivory_ck_editor.renderer.json_builder',
-                    ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE,
-                    new JsonBuilder(),
-                ],
-                [
-                    'request_stack',
-                    ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE,
-                    $this->requestStack,
-                ],
-                [
-                    'router',
-                    ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE,
-                    $this->router,
-                ],
-                [
-                    'templating',
-                    ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE,
-                    $this->templating,
-                ],
-                [
-                    'twig',
-                    ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE,
-                    $this->twig,
-                ],
-            ]));
-
-        $this->renderer = new CKEditorRenderer($this->container);
     }
 
     public function testDefaultState()
     {
-        $this->assertInstanceOf(CKEditorRendererInterface::class, $this->renderer);
+        $this->assertInstanceOf(CKEditorRendererInterface::class, $this->createRenderer());
     }
 
     /**
@@ -145,7 +99,7 @@ class CKEditorRendererTest extends AbstractTestCase
             ->with($this->equalTo($path))
             ->will($this->returnValue($asset));
 
-        $this->assertSame($url, $this->renderer->renderBasePath($path));
+        $this->assertSame($url, $this->createRenderer()->renderBasePath($path));
     }
 
     public function testRenderJsPath()
@@ -156,7 +110,7 @@ class CKEditorRendererTest extends AbstractTestCase
             ->with($this->equalTo('foo'))
             ->will($this->returnValue('bar'));
 
-        $this->assertSame('bar', $this->renderer->renderJsPath('foo'));
+        $this->assertSame('bar', $this->createRenderer()->renderJsPath('foo'));
     }
 
     /**
@@ -167,19 +121,14 @@ class CKEditorRendererTest extends AbstractTestCase
      */
     public function testRenderWidgetWithLocaleRequest($symfonyLocale, $ckEditorLocale)
     {
-        $this->requestStack
-            ->expects($this->once())
-            ->method('getMasterRequest')
-            ->will($this->returnValue($this->request));
-
         $this->request
-            ->expects($this->once())
+            ->expects($this->exactly(2))
             ->method('getLocale')
             ->will($this->returnValue($symfonyLocale));
 
         $this->assertSame(
             'CKEDITOR.replace("foo", {"language":"'.$ckEditorLocale.'"});',
-            $this->renderer->renderWidget('foo', [])
+            $this->createRenderer()->renderWidget('foo', [])
         );
     }
 
@@ -191,21 +140,14 @@ class CKEditorRendererTest extends AbstractTestCase
      */
     public function testRenderWidgetWithLocaleParameter($symfonyLocale, $ckEditorLocale)
     {
-        $this->container
-            ->expects($this->once())
-            ->method('hasParameter')
-            ->with($this->identicalTo('locale'))
-            ->will($this->returnValue(true));
-
-        $this->container
-            ->expects($this->once())
-            ->method('getParameter')
-            ->with($this->identicalTo('locale'))
-            ->will($this->returnValue($symfonyLocale));
+        $this->request
+            ->expects($this->exactly(1))
+            ->method('getLocale')
+            ->will($this->returnValue(null));
 
         $this->assertSame(
             'CKEDITOR.replace("foo", {"language":"'.$ckEditorLocale.'"});',
-            $this->renderer->renderWidget('foo', [])
+            $this->createRenderer($symfonyLocale)->renderWidget('foo', [])
         );
     }
 
@@ -219,21 +161,15 @@ class CKEditorRendererTest extends AbstractTestCase
     {
         $this->assertSame(
             'CKEDITOR.replace("foo", {"language":"'.$ckEditorLocale.'"});',
-            $this->renderer->renderWidget('foo', ['language' => $symfonyLocale])
+            $this->createRenderer()->renderWidget('foo', ['language' => $symfonyLocale])
         );
     }
 
     public function testRenderWidgetWithoutLocale()
     {
-        $this->container
-            ->expects($this->once())
-            ->method('hasParameter')
-            ->with($this->identicalTo('locale'))
-            ->will($this->returnValue(false));
-
         $this->assertSame(
             'CKEDITOR.replace("foo", []);',
-            $this->renderer->renderWidget('foo', [])
+            $this->createRenderer(null)->renderWidget('foo', [])
         );
     }
 
@@ -254,7 +190,7 @@ class CKEditorRendererTest extends AbstractTestCase
 
         $this->assertSame(
             'CKEDITOR.replace("foo", {"contentsCss":["'.$url.'"]});',
-            $this->renderer->renderWidget('foo', ['contentsCss' => $path])
+            $this->createRenderer()->renderWidget('foo', ['contentsCss' => $path])
         );
     }
 
@@ -277,7 +213,7 @@ class CKEditorRendererTest extends AbstractTestCase
 
         $this->assertSame(
             'CKEDITOR.replace("foo", {"contentsCss":'.json_encode($urls).'});',
-            $this->renderer->renderWidget('foo', ['contentsCss' => $paths])
+            $this->createRenderer()->renderWidget('foo', ['contentsCss' => $paths])
         );
     }
 
@@ -290,7 +226,7 @@ class CKEditorRendererTest extends AbstractTestCase
     {
         $this->assertSame(
             'CKEDITOR.replace("foo", {"filebrowser'.$filebrowser.'Url":"'.($url = 'browse_url').'"});',
-            $this->renderer->renderWidget('foo', ['filebrowser'.$filebrowser.'Url' => $url])
+            $this->createRenderer()->renderWidget('foo', ['filebrowser'.$filebrowser.'Url' => $url])
         );
     }
 
@@ -298,7 +234,7 @@ class CKEditorRendererTest extends AbstractTestCase
     {
         $this->assertSame(
             'CKEDITOR.replace("foo", {"filebrowser'.($filebrowser = 'VideoBrowse').'Url":"'.($url = 'browse_url').'"});',
-            $this->renderer->renderWidget(
+            $this->createRenderer()->renderWidget(
                 'foo',
                 ['filebrowser'.$filebrowser.'Url' => $url],
                 ['filebrowsers'                   => [$filebrowser]]
@@ -325,7 +261,7 @@ class CKEditorRendererTest extends AbstractTestCase
 
         $this->assertSame(
             'CKEDITOR.replace("foo", {"filebrowser'.$filebrowser.'Url":"browse_url"});',
-            $this->renderer->renderWidget('foo', ['filebrowser'.$filebrowser.'Route' => $route])
+            $this->createRenderer()->renderWidget('foo', ['filebrowser'.$filebrowser.'Route' => $route])
         );
     }
 
@@ -348,7 +284,7 @@ class CKEditorRendererTest extends AbstractTestCase
 
         $this->assertSame(
             'CKEDITOR.replace("foo", {"filebrowser'.$filebrowser.'Url":"browse_url"});',
-            $this->renderer->renderWidget('foo', [
+            $this->createRenderer()->renderWidget('foo', [
                 'filebrowser'.$filebrowser.'Route'           => $route,
                 'filebrowser'.$filebrowser.'RouteParameters' => $routeParameters,
                 'filebrowser'.$filebrowser.'RouteType'       => $routeType,
@@ -375,7 +311,7 @@ class CKEditorRendererTest extends AbstractTestCase
 
         $this->assertSame(
             'CKEDITOR.replace("foo", {"filebrowser'.$filebrowser.'Url":"browse_url"});',
-            $this->renderer->renderWidget('foo', [
+            $this->createRenderer()->renderWidget('foo', [
                 'filebrowser'.$filebrowser.'Handler' => function (RouterInterface $router) {
                     return $router->generate('browse_route', ['foo' => 'bar'], UrlGeneratorInterface::ABSOLUTE_URL);
                 },
@@ -387,7 +323,7 @@ class CKEditorRendererTest extends AbstractTestCase
     {
         $this->assertSame(
             'CKEDITOR.replace("foo", {"protectedSource":[/<\?[\s\S]*?\?>/g,/<%[\s\S]*?%>/g]});',
-            $this->renderer->renderWidget('foo', [
+            $this->createRenderer()->renderWidget('foo', [
                 'protectedSource' => [
                     '/<\?[\s\S]*?\?>/g',
                     '/<%[\s\S]*?%>/g',
@@ -400,7 +336,7 @@ class CKEditorRendererTest extends AbstractTestCase
     {
         $this->assertSame(
             'CKEDITOR.replace("foo", {"stylesheetParser_skipSelectors":/(^body\.|^caption\.|\.high|^\.)/i});',
-            $this->renderer->renderWidget('foo', [
+            $this->createRenderer()->renderWidget('foo', [
                 'stylesheetParser_skipSelectors' => '/(^body\.|^caption\.|\.high|^\.)/i',
             ])
         );
@@ -410,7 +346,7 @@ class CKEditorRendererTest extends AbstractTestCase
     {
         $this->assertSame(
             'CKEDITOR.replace("foo", {"stylesheetParser_validSelectors":/\^(p|span)\.\w+/});',
-            $this->renderer->renderWidget('foo', [
+            $this->createRenderer()->renderWidget('foo', [
                 'stylesheetParser_validSelectors' => '/\^(p|span)\.\w+/',
             ])
         );
@@ -420,7 +356,7 @@ class CKEditorRendererTest extends AbstractTestCase
     {
         $this->assertSame(
             'CKEDITOR.replace("foo", {"config":{"enterMode":CKEDITOR.ENTER_BR,"shiftEnterMode":CKEDITOR.ENTER_BR}});',
-            $this->renderer->renderWidget('foo', [
+            $this->createRenderer()->renderWidget('foo', [
                 'config' => [
                     'enterMode'      => 'CKEDITOR.ENTER_BR',
                     'shiftEnterMode' => 'CKEDITOR.ENTER_BR',
@@ -433,7 +369,7 @@ class CKEditorRendererTest extends AbstractTestCase
     {
         $this->assertSame(
             'CKEDITOR.disableAutoInline = true;'."\n".'CKEDITOR.replace("foo", []);',
-            $this->renderer->renderWidget('foo', [], ['auto_inline' => false])
+            $this->createRenderer()->renderWidget('foo', [], ['auto_inline' => false])
         );
     }
 
@@ -441,7 +377,7 @@ class CKEditorRendererTest extends AbstractTestCase
     {
         $this->assertSame(
             'CKEDITOR.inline("foo", []);',
-            $this->renderer->renderWidget('foo', [], ['inline' => true])
+            $this->createRenderer()->renderWidget('foo', [], ['inline' => true])
         );
     }
 
@@ -450,7 +386,7 @@ class CKEditorRendererTest extends AbstractTestCase
         $this->assertSame(
             'var ivory_ckeditor_foo = CKEDITOR.replace("foo", []);'."\n".
             'ivory_ckeditor_foo.on(\'change\', function() { ivory_ckeditor_foo.updateElement(); });',
-            $this->renderer->renderWidget('foo', [], ['input_sync' => true])
+            $this->createRenderer()->renderWidget('foo', [], ['input_sync' => true])
         );
     }
 
@@ -461,7 +397,7 @@ class CKEditorRendererTest extends AbstractTestCase
             'CKEDITOR.instances["foo"].destroy(true); '.
             'delete CKEDITOR.instances["foo"]; '.
             '}',
-            $this->renderer->renderDestroy('foo')
+            $this->createRenderer()->renderDestroy('foo')
         );
     }
 
@@ -482,7 +418,7 @@ class CKEditorRendererTest extends AbstractTestCase
 
         $this->assertSame(
             'CKEDITOR.plugins.addExternal("foo", "'.$url.'", "bat");',
-            $this->renderer->renderPlugin('foo', ['path' => $path, 'filename' => 'bat'])
+            $this->createRenderer()->renderPlugin('foo', ['path' => $path, 'filename' => 'bat'])
         );
     }
 
@@ -490,7 +426,7 @@ class CKEditorRendererTest extends AbstractTestCase
     {
         $this->assertSame(
             'if (CKEDITOR.stylesSet.get("foo") === null) { CKEDITOR.stylesSet.add("foo", {"foo":"bar"}); }',
-            $this->renderer->renderStylesSet('foo', ['foo' => 'bar'])
+            $this->createRenderer()->renderStylesSet('foo', ['foo' => 'bar'])
         );
     }
 
@@ -520,7 +456,7 @@ class CKEditorRendererTest extends AbstractTestCase
 
         $this->assertSame(
             'CKEDITOR.addTemplates("foo", '.$json.');',
-            $this->renderer->renderTemplate('foo', ['imagesPath' => $path, 'templates' => $templates])
+            $this->createRenderer()->renderTemplate('foo', ['imagesPath' => $path, 'templates' => $templates])
         );
     }
 
@@ -531,7 +467,7 @@ class CKEditorRendererTest extends AbstractTestCase
      *
      * @dataProvider directoryAssetProvider
      */
-    public function testRenderTemplateWithTwigTemplating($path, $asset, $url)
+    public function testRenderTemplateWithAnEngine($path, $asset, $url)
     {
         $templates = [
             [
@@ -554,13 +490,7 @@ class CKEditorRendererTest extends AbstractTestCase
             ->with($this->equalTo($path))
             ->will($this->returnValue($asset));
 
-        $this->container
-            ->expects($this->once())
-            ->method('has')
-            ->with($this->identicalTo('twig'))
-            ->will($this->returnValue(true));
-
-        $this->twig
+        $this->templating
             ->expects($this->once())
             ->method('render')
             ->with($this->identicalTo($template), $this->identicalTo($templateParameters))
@@ -570,56 +500,7 @@ class CKEditorRendererTest extends AbstractTestCase
 
         $this->assertSame(
             'CKEDITOR.addTemplates("foo", '.$json.');',
-            $this->renderer->renderTemplate('foo', ['imagesPath' => $path, 'templates' => $templates])
-        );
-    }
-
-    /**
-     * @param string $path
-     * @param string $asset
-     * @param string $url
-     *
-     * @dataProvider directoryAssetProvider
-     */
-    public function testRenderTemplateWithPhpTemplating($path, $asset, $url)
-    {
-        $templates = [
-            [
-                'title'    => 'Template title',
-                'template' => $template = 'template_name',
-            ],
-        ];
-
-        $processedTemplates = [
-            [
-                'title' => 'Template title',
-                'html'  => $html = '<p>Template content</p>',
-            ],
-        ];
-
-        $this->packages
-            ->expects($this->once())
-            ->method('getUrl')
-            ->with($this->equalTo($path))
-            ->will($this->returnValue($asset));
-
-        $this->container
-            ->expects($this->once())
-            ->method('has')
-            ->with($this->identicalTo('twig'))
-            ->will($this->returnValue(false));
-
-        $this->templating
-            ->expects($this->once())
-            ->method('render')
-            ->with($this->identicalTo($template), $this->identicalTo([]))
-            ->will($this->returnValue($html));
-
-        $json = json_encode(['imagesPath' => $url, 'templates'  => $processedTemplates]);
-
-        $this->assertSame(
-            'CKEDITOR.addTemplates("foo", '.$json.');',
-            $this->renderer->renderTemplate('foo', ['imagesPath' => $path, 'templates' => $templates])
+            $this->createRenderer()->renderTemplate('foo', ['imagesPath' => $path, 'templates' => $templates])
         );
     }
 
@@ -685,5 +566,21 @@ class CKEditorRendererTest extends AbstractTestCase
             ['FlashUpload'],
             ['ImageUpload'],
         ];
+    }
+
+    /**
+     * @param string|null $localeParameter
+     * @return CKEditorRenderer
+     */
+    private function createRenderer($localeParameter = null)
+    {
+        return new CKEditorRenderer(
+            $this->jsonBuilder,
+            $this->router,
+            $this->requestStack,
+            $this->packages,
+            $this->templating,
+            $localeParameter
+        );
     }
 }

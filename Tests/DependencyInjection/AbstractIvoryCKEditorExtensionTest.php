@@ -15,10 +15,14 @@ use Ivory\CKEditorBundle\DependencyInjection\IvoryCKEditorExtension;
 use Ivory\CKEditorBundle\Form\Type\CKEditorType;
 use Ivory\CKEditorBundle\IvoryCKEditorBundle;
 use Ivory\CKEditorBundle\Tests\AbstractTestCase;
+use PHPUnit\Framework\MockObject\MockObject;
 use Symfony\Component\Asset\Packages;
+use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormRendererInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Templating\Helper\CoreAssetsHelper;
 
@@ -34,17 +38,17 @@ abstract class AbstractIvoryCKEditorExtensionTest extends AbstractTestCase
     private $container;
 
     /**
-     * @var Packages|CoreAssetsHelper|\PHPUnit_Framework_MockObject_MockObject
+     * @var Packages|CoreAssetsHelper|MockObject
      */
     private $packages;
 
     /**
-     * @var RouterInterface|\PHPUnit_Framework_MockObject_MockObject
+     * @var RouterInterface|MockObject
      */
     private $router;
 
     /**
-     * @var FormRendererInterface|\PHPUnit_Framework_MockObject_MockObject
+     * @var FormRendererInterface|MockObject
      */
     private $formRenderer;
 
@@ -65,9 +69,12 @@ abstract class AbstractIvoryCKEditorExtensionTest extends AbstractTestCase
         $this->container->set('router', $this->router);
         $this->container->set('templating.form.renderer', $this->formRenderer);
         $this->container->set('twig.form.renderer', $this->formRenderer);
+        $this->container->set('request_stack', $this->createMock(RequestStack::class));
 
         $this->container->registerExtension($extension = new IvoryCKEditorExtension());
         $this->container->loadFromExtension($extension->getAlias());
+        $loader = new XmlFileLoader($this->container, new FileLocator(__DIR__.'/../../Resources/config'));
+        $loader->load('test-services.xml');
 
         (new IvoryCKEditorBundle())->build($this->container);
     }
@@ -96,10 +103,10 @@ abstract class AbstractIvoryCKEditorExtensionTest extends AbstractTestCase
         $this->assertSame('bundles/ivoryckeditor/', $type->getBasePath());
         $this->assertSame('bundles/ivoryckeditor/ckeditor.js', $type->getJsPath());
         $this->assertSame('bundles/ivoryckeditor/adapters/jquery.js', $type->getJqueryPath());
-        $this->assertSame($this->container->get('ivory_ck_editor.config_manager'), $type->getConfigManager());
-        $this->assertSame($this->container->get('ivory_ck_editor.plugin_manager'), $type->getPluginManager());
-        $this->assertSame($this->container->get('ivory_ck_editor.styles_set_manager'), $type->getStylesSetManager());
-        $this->assertSame($this->container->get('ivory_ck_editor.template_manager'), $type->getTemplateManager());
+        $this->assertSame($this->container->get('test.ivory_ck_editor.config_manager'), $type->getConfigManager());
+        $this->assertSame($this->container->get('test.ivory_ck_editor.plugin_manager'), $type->getPluginManager());
+        $this->assertSame($this->container->get('test.ivory_ck_editor.styles_set_manager'), $type->getStylesSetManager());
+        $this->assertSame($this->container->get('test.ivory_ck_editor.template_manager'), $type->getTemplateManager());
     }
 
     public function testFormTag()
@@ -214,7 +221,7 @@ abstract class AbstractIvoryCKEditorExtensionTest extends AbstractTestCase
         $this->loadConfiguration($this->container, 'single_configuration');
         $this->container->compile();
 
-        $configManager = $this->container->get('ivory_ck_editor.config_manager');
+        $configManager = $this->container->get('test.ivory_ck_editor.config_manager');
 
         $expected = [
             'default' => [
@@ -232,7 +239,7 @@ abstract class AbstractIvoryCKEditorExtensionTest extends AbstractTestCase
         $this->loadConfiguration($this->container, 'multiple_configuration');
         $this->container->compile();
 
-        $configManager = $this->container->get('ivory_ck_editor.config_manager');
+        $configManager = $this->container->get('test.ivory_ck_editor.config_manager');
 
         $expected = [
             'default' => [
@@ -254,7 +261,7 @@ abstract class AbstractIvoryCKEditorExtensionTest extends AbstractTestCase
         $this->loadConfiguration($this->container, 'default_configuration');
         $this->container->compile();
 
-        $configManager = $this->container->get('ivory_ck_editor.config_manager');
+        $configManager = $this->container->get('test.ivory_ck_editor.config_manager');
 
         $expected = [
             'default' => ['uiColor' => '#000000'],
@@ -275,7 +282,7 @@ abstract class AbstractIvoryCKEditorExtensionTest extends AbstractTestCase
             'filename' => 'plugin.js',
         ]];
 
-        $this->assertSame($expected, $this->container->get('ivory_ck_editor.plugin_manager')->getPlugins());
+        $this->assertSame($expected, $this->container->get('test.ivory_ck_editor.plugin_manager')->getPlugins());
     }
 
     public function testStylesSets()
@@ -309,7 +316,7 @@ abstract class AbstractIvoryCKEditorExtensionTest extends AbstractTestCase
             ],
         ];
 
-        $this->assertSame($expected, $this->container->get('ivory_ck_editor.styles_set_manager')->getStylesSets());
+        $this->assertSame($expected, $this->container->get('test.ivory_ck_editor.styles_set_manager')->getStylesSets());
     }
 
     public function testTemplates()
@@ -333,7 +340,7 @@ abstract class AbstractIvoryCKEditorExtensionTest extends AbstractTestCase
             ],
         ];
 
-        $this->assertSame($expected, $this->container->get('ivory_ck_editor.template_manager')->getTemplates());
+        $this->assertSame($expected, $this->container->get('test.ivory_ck_editor.template_manager')->getTemplates());
     }
 
     public function testToolbars()
@@ -341,7 +348,7 @@ abstract class AbstractIvoryCKEditorExtensionTest extends AbstractTestCase
         $this->loadConfiguration($this->container, 'toolbars');
         $this->container->compile();
 
-        $toolbarManager = $this->container->get('ivory_ck_editor.toolbar_manager');
+        $toolbarManager = $this->container->get('test.ivory_ck_editor.toolbar_manager');
 
         $this->assertSame(
             [
