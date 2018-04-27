@@ -1,7 +1,7 @@
 {
     "name": "egeloen/ckeditor-bundle",
     "type": "symfony-bundle",
-    "description": "Provides a CKEditor integration for your Symfony2 Project.",
+    "description": "Provides a CKEditor integration for your Symfony Project.",
     "keywords": [ "ckeditor" ],
     "license": "MIT",
     "authors": [
@@ -12,6 +12,7 @@
     ],
     "require": {
         "php": "^5.6|^7.0",
+        "ext-zip": "*",
         "egeloen/json-builder": "^2.0|^3.0",
         "symfony/dependency-injection": "^2.7|^3.0",
         "symfony/form": "^2.7|^3.0",
